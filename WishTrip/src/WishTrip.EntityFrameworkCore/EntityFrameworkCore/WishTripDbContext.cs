@@ -12,6 +12,7 @@ using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
+using WishTrip.Destinos;
 
 namespace WishTrip.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ public class WishTripDbContext :
     IIdentityDbContext
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
-
+    public DbSet<Destino> Destinos { get; set; }
 
     #region Entities from the modules
 
@@ -69,7 +70,15 @@ public class WishTripDbContext :
         builder.ConfigureIdentity();
         builder.ConfigureOpenIddict();
         builder.ConfigureBlobStoring();
-        
+
+        builder.Entity<Destino>(b =>
+        {
+            b.ToTable(WishTripConsts.DbTablePrefix + "Destinos", WishTripConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Nombre).IsRequired().HasMaxLength(256);
+        });
+
         /* Configure your own tables/entities inside here */
 
         //builder.Entity<YourEntity>(b =>
