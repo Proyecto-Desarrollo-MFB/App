@@ -37,21 +37,30 @@ public abstract class DestinoAppService_Tests<TStartupModule> : WishTripApplicat
     [Fact]
     public async Task Should_Create_A_Valid_Destino()
     {
+        //Arrange
+        var nuevoDestino = new CreateUpdateDestinoDto
+        {
+            Nombre = "Punta Cana",
+            Pais = "República Dominicana",
+            Poblacion = 5,
+            Foto = "asd"
+        };
+
         //Act
-        var result = await _destinoAppService.CreateAsync(
-            new CreateUpdateDestinoDto
-            {
-                Nombre = "Punta Cana",
-                Pais = "República Dominicana",
-                Poblacion = 5,
-                Foto = "asd"
-            }
-        );
+        var result = await _destinoAppService.CreateAsync(nuevoDestino);
 
         //Assert
+
         result.Id.ShouldNotBe(Guid.Empty);
         result.Nombre.ShouldBe("Punta Cana");
-    }
+
+        var destinoFromDb = await _destinoAppService.GetAsync(result.Id);
+
+        destinoFromDb.ShouldNotBeNull();
+        destinoFromDb.Id.ShouldBe(result.Id);
+        destinoFromDb.Nombre.ShouldBe(nuevoDestino.Nombre);
+        destinoFromDb.Pais.ShouldBe(nuevoDestino.Pais);
+    } 
 
     [Fact]
     public async Task Should_Not_Create_A_Destino_Without_Name()
