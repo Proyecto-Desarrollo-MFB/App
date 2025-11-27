@@ -7,6 +7,7 @@ using Shouldly;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Modularity;
 using Volo.Abp.Validation;
+using Volo.Abp.Domain.Repositories;
 using Xunit;
 
 namespace WishTrip.Destinos;
@@ -15,10 +16,12 @@ public abstract class DestinoAppService_Tests<TStartupModule> : WishTripApplicat
     where TStartupModule : IAbpModule
 {
     private readonly IDestinoAppService _destinoAppService;
+    private readonly IRepository<Destino, Guid> _destinoRepository;
 
     protected DestinoAppService_Tests()
     {
         _destinoAppService = GetRequiredService<IDestinoAppService>();
+        _destinoRepository = GetRequiredService<IRepository<Destino, Guid>>();
 
     }
 
@@ -54,7 +57,7 @@ public abstract class DestinoAppService_Tests<TStartupModule> : WishTripApplicat
         result.Id.ShouldNotBe(Guid.Empty);
         result.Nombre.ShouldBe("Punta Cana");
 
-        var destinoFromDb = await _destinoAppService.GetAsync(result.Id);
+        var destinoFromDb = await _destinoRepository.GetAsync(result.Id);
 
         destinoFromDb.ShouldNotBeNull();
         destinoFromDb.Id.ShouldBe(result.Id);
