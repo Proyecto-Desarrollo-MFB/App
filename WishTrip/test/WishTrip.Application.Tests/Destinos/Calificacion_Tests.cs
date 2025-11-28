@@ -29,13 +29,12 @@ public class Calificacion_Tests
         );
     }
 
-    // 1. VALIDACIÓN: ASOCIACIÓN DE USUARIO (Lógica Principal)
     [Fact]
     public async Task CreateAsync_Should_Assign_CurrentUser_To_Calificacion()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        _currentUserMock.Id.Returns(userId); // El usuario está logueado
+        _currentUserMock.Id.Returns(userId);
 
         var input = new CreateUpdateCalificacionDto
         {
@@ -44,7 +43,6 @@ public class Calificacion_Tests
             Comentario = "Excelente"
         };
 
-        // Configuramos Mocks del Mapper
         _objectMapperMock.Map<CreateUpdateCalificacionDto, Calificacion>(Arg.Any<CreateUpdateCalificacionDto>())
             .Returns(new Calificacion { DestinoId = input.DestinoId, Puntaje = input.Puntaje });
 
@@ -56,11 +54,10 @@ public class Calificacion_Tests
         // Act
         await _calificacionAppService.CreateAsync(input);
 
-        // Assert: Verificamos que al repositorio llegó la entidad con el UserId correcto
+        // Assert
         await _repoMock.Received(1).InsertAsync(Arg.Is<Calificacion>(c => c.UserId == userId));
     }
 
-    // 2. VALIDACIÓN: COMENTARIOS OPCIONALES (Lógica Secundaria)
     [Fact]
     public async Task CreateAsync_Should_Accept_Null_Comments()
     {
@@ -71,7 +68,7 @@ public class Calificacion_Tests
         {
             DestinoId = Guid.NewGuid(),
             Puntaje = 4,
-            Comentario = null // El comentario es opcional (null)
+            Comentario = null
         };
 
         _objectMapperMock.Map<CreateUpdateCalificacionDto, Calificacion>(Arg.Any<CreateUpdateCalificacionDto>())
@@ -85,12 +82,12 @@ public class Calificacion_Tests
         // Act
         await _calificacionAppService.CreateAsync(input);
 
-        // Assert: Verificamos que se guardó sin explotar aunque el comentario sea null
+        // Assert
         await _repoMock.Received(1).InsertAsync(Arg.Is<Calificacion>(c => c.Comentario == null));
     }
 }
 
-// --- Wrapper necesario para Mocks ---
+
 public class CalificacionAppServiceTestWrapper : CalificacionAppService
 {
     private readonly IObjectMapper _testMapper;
