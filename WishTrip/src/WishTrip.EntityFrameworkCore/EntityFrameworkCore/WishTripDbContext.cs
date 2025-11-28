@@ -24,6 +24,7 @@ public class WishTripDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Destino> Destinos { get; set; }
+    public DbSet<Calificacion> Calificaciones { get; set; }
 
     #region Entities from the modules
 

@@ -9,14 +9,19 @@ using Volo.Abp.EntityFrameworkCore.Sqlite;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
+using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.Uow;
+using NSubstitute; // Para crear el mock
+using WishTrip.Destinos; // Para ver la interfaz
 
 namespace WishTrip.EntityFrameworkCore;
 
 [DependsOn(
     typeof(WishTripApplicationTestModule),
     typeof(WishTripEntityFrameworkCoreModule),
-    typeof(AbpEntityFrameworkCoreSqliteModule)
+    typeof(AbpEntityFrameworkCoreSqliteModule),
+    typeof(WishTripTestBaseModule),
+    typeof(AbpPermissionManagementEntityFrameworkCoreModule)
 )]
 public class WishTripEntityFrameworkCoreTestModule : AbpModule
 {
@@ -37,6 +42,7 @@ public class WishTripEntityFrameworkCoreTestModule : AbpModule
         context.Services.AddAlwaysDisableUnitOfWorkTransaction();
 
         ConfigureInMemorySqlite(context.Services);
+        context.Services.AddSingleton(Substitute.For<ICitySearchService>());
 
     }
 
