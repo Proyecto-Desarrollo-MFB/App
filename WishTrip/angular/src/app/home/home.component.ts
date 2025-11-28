@@ -5,7 +5,6 @@ import { AuthService, LocalizationPipe } from '@abp/ng.core';
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [LocalizationPipe]
 })
 export class HomeComponent {
   private authService = inject(AuthService);

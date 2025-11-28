@@ -1,6 +1,6 @@
 import { authGuard, permissionGuard } from '@abp/ng.core';
 import { Routes } from '@angular/router';
-import { BuscarCiudadesComponent } from './destinos/buscar-ciudades/buscar-ciudades.component';
+// No necesitas importar el componente arriba si usas Lazy Loading (recomendado)
 
 export const APP_ROUTES: Routes = [
   {
@@ -18,10 +18,23 @@ export const APP_ROUTES: Routes = [
   },
   {
     path: 'setting-management',
-    loadChildren: () => import('@abp/ng.setting-management').then(c => c.createRoutes()),
+    loadChildren: () =>
+      import('@abp/ng.setting-management').then(m => m.SettingManagementModule),
   },
+  // --- AQUI ESTA EL CAMBIO ---
   {
-  path: 'buscar-ciudades',
-  component: BuscarCiudadesComponent,
-}
+    path: 'buscar-ciudades',
+    // 1. Lazy Loading: Carga el componente solo cuando se visita (Mejor rendimiento)
+    loadComponent: () => 
+      import('./destinos/buscar-ciudades/buscar-ciudades.component')
+      .then(c => c.BuscarCiudadesComponent),
+    
+    // 2. Seguridad: Cumple el requisito de "Autenticación" y "Autorización" del TP 
+    canActivate: [authGuard, permissionGuard],
+    
+    // 3. Permisos: Define qué permiso específico del Backend se necesita
+    data: {
+      requiredPolicy: 'TravelTracker.Destinations', // <--- OJO: Revisa el nombre exacto en tu API
+    },
+  },
 ];
