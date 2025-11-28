@@ -20,27 +20,22 @@ namespace WishTrip.Destinos
 
         public async Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request)
         {
-            // 1. Se valida que haya algo que buscar
             if (string.IsNullOrWhiteSpace(request.PartialName))
             {
                 return new CitySearchResultDto();
             }
 
-            // 2. Se prepara el cliente HTTP
             var client = _httpClientFactory.CreateClient();
 
             var url = $"http://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix={request.PartialName}&limit=5&offset=0&hateoasMode=false";
 
             try
             {
-                // 3. Llamada (GET)
                 var responseString = await client.GetStringAsync(url);
 
-                // 4. Texto JSON a objetos C#
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var geoDbResponse = JsonSerializer.Deserialize<GeoDbResponseRoot>(responseString, options);
 
-                // 5. Mapeamos la respuesta externa al DTO interno
                 var result = new CitySearchResultDto();
 
                 if (geoDbResponse?.Data != null)

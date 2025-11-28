@@ -1,39 +1,64 @@
 <div class="card">
-  <div class="card-header">
-    <h5 class="card-title">🔍 Buscar Ciudades</h5>
-  </div>
   <div class="card-body">
-    
-    <div class="mb-3">
-      <label class="form-label">Ingrese el nombre de la ciudad:</label>
-      <input 
-        type="text" 
-        class="form-control" 
-        placeholder="Ej: Paris, Buenos Aires..." 
-        #searchInput
-        (keyup)="onSearch(searchInput.value)" 
-      />
-      <div class="form-text">Escriba al menos 3 letras para buscar.</div>
+    <h3>Buscador de Destinos</h3>
+
+    <div class="row mt-4 g-2">
+      <div class="col-md-5">
+        <label class="form-label">Destino</label>
+        <input type="text" class="form-control" [(ngModel)]="filters.destination" 
+               (keyup.enter)="search()" placeholder="Ej: París">
+      </div>
+      <div class="col-md-5">
+        <label class="form-label">País</label>
+        <input type="text" class="form-control" [(ngModel)]="filters.country" 
+               (keyup.enter)="search()" placeholder="Ej: Francia">
+      </div>
+      <div class="col-md-2 d-flex align-items-end gap-2">
+        <button class="btn btn-primary w-100" (click)="search()" [disabled]="isLoading">
+          <i class="fa fa-search"></i> Buscar
+        </button>
+        <button class="btn btn-secondary" (click)="clear()" [disabled]="isLoading">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
     </div>
 
-    <div *ngIf="loading" class="text-center my-3">
+    <hr class="my-4">
+
+    <div *ngIf="isLoading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Cargando...</span>
       </div>
-      <p>Buscando en GeoDB...</p>
     </div>
 
-    <div *ngIf="!loading && ciudades.length > 0" class="list-group mt-3">
-      <a href="javascript:void(0)" class="list-group-item list-group-item-action" *ngFor="let ciudad of ciudades">
-        <div class="d-flex w-100 justify-content-between">
-          <h6 class="mb-1">{{ ciudad.nombre }}</h6>
-          <small class="text-muted">🌎 {{ ciudad.pais }}</small>
+    <div class="row" *ngIf="!isLoading">
+      <div *ngIf="cities.length === 0" class="col-12 text-center text-muted">
+        <p>No se encontraron ciudades con esos criterios.</p>
+      </div>
+
+      <div class="col-md-4 mb-4" *ngFor="let city of cities">
+        <div class="card h-100 shadow-sm">
+          <img [src]="city.imageUrl || 'assets/images/logo.png'" 
+               class="card-img-top" style="height: 200px; object-fit: cover;" alt="city">
+          
+          <div class="card-body">
+            <h5 class="card-title">{{ city.name }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{{ city.country }}</h6>
+            
+            <p class="card-text mt-3">
+              <strong>Población:</strong> {{ city.population | number }} <br>
+              <small class="text-muted">
+                Lat: {{ city.latitude | number:'1.2-2' }}, 
+                Lon: {{ city.longitude | number:'1.2-2' }}
+              </small>
+            </p>
+            
+            <button class="btn btn-outline-info btn-sm w-100">
+              <i class="fa fa-map-marker"></i> Ver en mapa
+            </button>
+          </div>
         </div>
-      </a>
-    </div>
-
-    <div *ngIf="!loading && ciudades.length === 0 && searchInput.value.length > 2" class="alert alert-warning mt-3">
-      No se encontraron ciudades con ese nombre.
+      </div>
     </div>
 
   </div>

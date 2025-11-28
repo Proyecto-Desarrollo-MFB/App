@@ -1213,6 +1213,78 @@
             }
           }
         },
+        "WishTrip.Destinos.CitySearchAppService": {
+          "controllerName": "CitySearch",
+          "controllerGroupName": "CitySearch",
+          "isRemoteService": true,
+          "isIntegrationService": false,
+          "apiVersion": null,
+          "type": "WishTrip.Destinos.CitySearchAppService",
+          "interfaces": [
+            {
+              "type": "WishTrip.Destinos.ICitySearchService",
+              "name": "ICitySearchService",
+              "methods": [
+                {
+                  "name": "SearchCitiesAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "request",
+                      "typeAsString": "WishTrip.Destinos.CitySearchRequestDto, WishTrip.Application.Contracts",
+                      "type": "WishTrip.Destinos.CitySearchRequestDto",
+                      "typeSimple": "WishTrip.Destinos.CitySearchRequestDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "WishTrip.Destinos.CitySearchResultDto",
+                    "typeSimple": "WishTrip.Destinos.CitySearchResultDto"
+                  }
+                }
+              ]
+            }
+          ],
+          "actions": {
+            "SearchCitiesAsyncByInput": {
+              "uniqueName": "SearchCitiesAsyncByInput",
+              "name": "SearchCitiesAsync",
+              "httpMethod": "POST",
+              "url": "api/app/city-search/search-cities",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "WishTrip.Destinos.CitySearchRequestDto, WishTrip.Application.Contracts",
+                  "type": "WishTrip.Destinos.CitySearchRequestDto",
+                  "typeSimple": "WishTrip.Destinos.CitySearchRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "WishTrip.Destinos.CitySearchRequestDto",
+                  "typeSimple": "WishTrip.Destinos.CitySearchRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "WishTrip.Destinos.CitySearchResultDto",
+                "typeSimple": "WishTrip.Destinos.CitySearchResultDto"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "WishTrip.Destinos.ICitySearchService"
+            }
+          }
+        },
         "WishTrip.Destinos.DestinoAppService": {
           "controllerName": "Destino",
           "controllerGroupName": "Destino",
@@ -9383,7 +9455,7 @@
       ]
     },
     "WishTrip.Destinos.CitySearchRequestDto": {
-      "baseType": null,
+      "baseType": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
@@ -9391,6 +9463,30 @@
       "properties": [
         {
           "name": "PartialName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Destination",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Country",
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",

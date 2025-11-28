@@ -1,51 +1,53 @@
-import { Component, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, filter, finalize } from 'rxjs/operators';
-import { DestinoService } from '../../proxy/destinos/destino.service'; // Tu servicio manual
-import { CityDto } from '../../proxy/destinos/models'; // Tus modelos
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CoreModule } from '@abp/ng.core';
+import { ThemeSharedModule } from '@abp/ng.theme.shared';
+import { CitySearchService } from '../../proxy/destinos/city-search.service';
+import { CityDto, CitySearchRequestDto } from '../../proxy/destinos/models';
 
 @Component({
   selector: 'app-buscar-ciudades',
+  standalone: true,
+  imports: [CommonModule, FormsModule, CoreModule, ThemeSharedModule],
   templateUrl: './buscar-ciudades.component.html',
-  styleUrls: ['./buscar-ciudades.component.scss'] // O .css si usas css
+  styleUrls: ['./buscar-ciudades.component.scss']
 })
 export class BuscarCiudadesComponent implements OnInit {
-  
-  // Variables para la vista
-  ciudades: CityDto[] = [];
-  loading = false;
-  busqueda$ = new Subject<string>(); // "Subject" para manejar el debounce
 
-  constructor(private destinoService: DestinoService) {}
+  private cityService = inject(CitySearchService);
 
-  ngOnInit(): void {
-    // Configuración del Debounce (Pide el PDF)
-    this.busqueda$.pipe(
-      filter(texto => texto.length > 2), // Solo busca si hay más de 2 letras
-      debounceTime(500),                 // Espera 500ms a que dejes de escribir
-      distinctUntilChanged(),            // No busca si el texto es igual al anterior
-      switchMap(texto => {
-        this.loading = true;             // Activa el spinner
-        return this.destinoService.searchCities({ partialName: texto })
-          .pipe(finalize(() => this.loading = false)); // Apaga el spinner al terminar
-      })
-    ).subscribe({
-      next: (resultado) => {
-        this.ciudades = resultado.cities;
+  cities: CityDto[] = [];
+  isLoading = false;
+
+  filters = {
+    destination: '',
+    country: '',
+    maxResultCount: 10,
+    skipCount: 0
+  } as CitySearchRequestDto;
+
+  ngOnInit() {
+    this.search();
+  }
+
+  search() {
+    this.isLoading = true;
+
+    this.cityService.searchCities(this.filters).subscribe({
+      next: (res) => {
+        this.cities = res.cities || []; 
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error buscando ciudades', err);
-        this.loading = false;
+        console.error('Error al buscar:', err);
+        this.isLoading = false;
       }
     });
   }
 
-  // Método que llama el input del HTML
-  onSearch(texto: string): void {
-    if (!texto) {
-      this.ciudades = [];
-      return;
-    }
-    this.busqueda$.next(texto); // Empuja el texto al "tubo" del debounce
+  clear() {
+    this.filters.partialName = '';
+    this.search();
   }
 }

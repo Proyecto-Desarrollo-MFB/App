@@ -1,4 +1,4 @@
-import type { AuditedEntityDto } from '@abp/ng.core';
+import type { AuditedEntityDto, PagedAndSortedResultRequestDto } from '@abp/ng.core';
 
 export interface CalificacionDto extends AuditedEntityDto<string> {
   destinoId?: string;
@@ -12,8 +12,10 @@ export interface CityDto {
   pais?: string;
 }
 
-export interface CitySearchRequestDto {
+export interface CitySearchRequestDto extends PagedAndSortedResultRequestDto {
   partialName?: string;
+  destination?: string;
+  country?: string;
 }
 
 export interface CitySearchResultDto {
