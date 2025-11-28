@@ -15,4 +15,5 @@ public interface IDestinoAppService :
         PagedAndSortedResultRequestDto,
         CreateUpdateDestinoDto>
 {
+    Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request);
 }
