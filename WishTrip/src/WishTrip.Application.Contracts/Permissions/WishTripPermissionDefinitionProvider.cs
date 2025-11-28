@@ -10,6 +10,7 @@ public class WishTripPermissionDefinitionProvider : PermissionDefinitionProvider
     public override void Define(IPermissionDefinitionContext context)
     {
         var myGroup = context.AddGroup(WishTripPermissions.GroupName);
+        myGroup.AddPermission(WishTripPermissions.CitySearch, L("Permission:CitySearch"));
 
         //Define your own permissions here. Example:
         //myGroup.AddPermission(WishTripPermissions.MyPermission1, L("Permission:MyPermission1"));
