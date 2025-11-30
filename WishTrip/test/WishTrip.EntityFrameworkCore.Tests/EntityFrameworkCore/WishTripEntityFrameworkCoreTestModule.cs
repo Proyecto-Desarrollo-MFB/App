@@ -73,7 +73,7 @@ public class WishTripEntityFrameworkCoreTestModule : AbpModule
             .UseSqlite(connection)
             .Options;
 
-        using (var context = new WishTripDbContext(options))
+        using (var context = new WishTripDbContext(options, null))
         {
             context.GetService<IRelationalDatabaseCreator>().CreateTables();
         }
