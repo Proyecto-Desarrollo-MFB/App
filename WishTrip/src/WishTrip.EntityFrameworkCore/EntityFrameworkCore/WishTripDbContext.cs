@@ -9,9 +9,10 @@ using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.OpenIddict.EntityFrameworkCore;
+using Volo.Abp.Users;
 using WishTrip.Destinos;
 
 namespace WishTrip.EntityFrameworkCore;
@@ -25,6 +26,8 @@ public class WishTripDbContext :
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Destino> Destinos { get; set; }
     public DbSet<Calificacion> Calificaciones { get; set; }
+
+    public ICurrentUser CurrentUser { get; set; }
 
     #region Entities from the modules
 
@@ -51,10 +54,10 @@ public class WishTripDbContext :
 
     #endregion
 
-    public WishTripDbContext(DbContextOptions<WishTripDbContext> options)
+    public WishTripDbContext(DbContextOptions<WishTripDbContext> options, ICurrentUser currentUser)
         : base(options)
     {
-
+        CurrentUser = currentUser;
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -78,6 +81,13 @@ public class WishTripDbContext :
             b.ConfigureByConvention();
             b.HasKey(x => x.Id);
             b.Property(x => x.Nombre).IsRequired().HasMaxLength(256);
+        });
+        builder.Entity<Calificacion>(b =>
+        {
+            b.ToTable(WishTripConsts.DbTablePrefix + "Calificaciones", WishTripConsts.DbSchema);
+            b.ConfigureByConvention();
+
+            b.HasQueryFilter(c => this.CurrentUser == null || !this.CurrentUser.Id.HasValue || c.UserId == this.CurrentUser.Id.Value);
         });
 
         /* Configure your own tables/entities inside here */

@@ -19,7 +19,7 @@ public class WishTripDbContextFactory : IDesignTimeDbContextFactory<WishTripDbCo
         var builder = new DbContextOptionsBuilder<WishTripDbContext>()
             .UseSqlServer(configuration.GetConnectionString("Default"));
         
-        return new WishTripDbContext(builder.Options);
+        return new WishTripDbContext(builder.Options, null);
     }
 
     private static IConfigurationRoot BuildConfiguration()

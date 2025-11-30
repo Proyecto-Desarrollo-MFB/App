@@ -48,17 +48,17 @@ namespace WishTrip.Destinos
 
             return await MapToGetOutputDtoAsync(entity);
         }
-        protected override async Task<IQueryable<Calificacion>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
-        {
-
-            var query = await base.CreateFilteredQueryAsync(input);
-
-            if (_currentUser.Id.HasValue)
-            {
-                query = query.Where(q => q.UserId == _currentUser.Id.Value);
-            }
-
-            return query;
-        }
+        //protected override async Task<IQueryable<Calificacion>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
+        //{
+        //
+        //    var query = await base.CreateFilteredQueryAsync(input);
+        //
+        //    if (_currentUser.Id.HasValue)
+        //    {
+        //        query = query.Where(q => q.UserId == _currentUser.Id.Value);
+        //    }
+        //
+        //    return query;
+        //}
     }
 }
