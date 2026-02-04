@@ -9,6 +9,8 @@ public class WishTripApplicationAutoMapperProfile : Profile
     {
         CreateMap<Destino, DestinoDto>();
         CreateMap<CreateUpdateDestinoDto, Destino>();
+        CreateMap<Calificacion, CalificacionDto>();
+        CreateMap<CreateUpdateCalificacionDto, Calificacion>();
         /* You can configure your AutoMapper mapping configuration here.
          * Alternatively, you can split your mapping configurations
          * into multiple profile classes for a better organization. */
