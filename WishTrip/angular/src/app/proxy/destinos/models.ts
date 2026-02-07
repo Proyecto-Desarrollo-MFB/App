@@ -10,12 +10,19 @@ export interface CalificacionDto extends AuditedEntityDto<string> {
 export interface CityDto {
   nombre?: string;
   pais?: string;
+  countryCode?: string;
+  region?: string;
+  poblacion?: number;
+  lat?: number;
+  lon?: number;
 }
 
 export interface CitySearchRequestDto extends PagedAndSortedResultRequestDto {
   partialName?: string;
   destination?: string;
   country?: string;
+  region?: string;
+  minPopulation?: number;
 }
 
 export interface CitySearchResultDto {
