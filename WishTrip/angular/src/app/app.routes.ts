@@ -1,6 +1,7 @@
 import { authGuard, permissionGuard } from '@abp/ng.core';
 import { Routes } from '@angular/router';
 
+
 export const APP_ROUTES: Routes = [
   {
     path: '',
@@ -17,6 +18,23 @@ export const APP_ROUTES: Routes = [
   },
   {
     path: 'setting-management',
-    loadChildren: () => import('@abp/ng.setting-management').then(c => c.createRoutes()),
+    loadChildren: () =>
+      import('@abp/ng.setting-management').then(m => m.SettingManagementModule),
+  },
+
+  {
+    path: 'buscar-ciudades',
+
+    loadComponent: () => 
+      import('./destinos/buscar-ciudades/buscar-ciudades.component')
+      .then(c => c.BuscarCiudadesComponent),
+    
+
+    canActivate: [authGuard, permissionGuard],
+    
+
+    data: {
+      requiredPolicy: 'WishTrip.CitySearch', 
+    },
   },
 ];

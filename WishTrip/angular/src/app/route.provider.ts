@@ -17,5 +17,12 @@ function configureRoutes() {
         order: 1,
         layout: eLayoutType.application,
       },
+      {
+        path: '/buscar-ciudades',
+        name: 'Destinos',
+        iconClass: 'fas fa-map',
+        order: 2,
+        layout: eLayoutType.application,
+      },
   ]);
 }

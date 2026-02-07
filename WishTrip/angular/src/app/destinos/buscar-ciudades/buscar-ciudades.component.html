@@ -1,0 +1,96 @@
+<div class="card">
+  <div class="card-body">
+    <h3>Buscador de Destinos</h3>
+
+    <div class="row mt-4 g-2">
+      <div class="col-md-4">
+        <label class="form-label">Destino</label>
+        <input type="text" class="form-control" 
+               [(ngModel)]="filters.partialName" 
+               (ngModelChange)="onInputChange()"
+               (keyup.enter)="search()" 
+               placeholder="Ej: Bariloche">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">País</label>
+        <input type="text" class="form-control" 
+               [(ngModel)]="filters.country" 
+               (ngModelChange)="onInputChange()"
+               (keyup.enter)="search()" 
+               placeholder="Ej: Argentina">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Región</label>
+        <input type="text" class="form-control" 
+               [(ngModel)]="filters.region" 
+               (ngModelChange)="onInputChange()"
+               (keyup.enter)="search()" 
+               placeholder="Ej: Río Negro">
+      </div>
+
+      <div class="col-md-2 d-flex align-items-end gap-2">
+        <button class="btn btn-primary w-100" (click)="search()" [disabled]="isLoading">
+          <i class="fa fa-search"></i> Buscar
+        </button>
+        <button class="btn btn-secondary" (click)="clear()" [disabled]="isLoading">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="row mt-3 g-2">
+      <div class="col-md-3">
+        <label class="form-label">Población mínima</label>
+        <input type="number" min="0" class="form-control" 
+               [(ngModel)]="filters.minPopulation" 
+               (ngModelChange)="onInputChange()"
+               placeholder="Ej: 10000">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Resultados por página</label>
+        <input type="number" min="1" class="form-control" 
+               [(ngModel)]="pageSize" 
+               (change)="page = 1; search()" 
+               placeholder="10">
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="!isLoading">
+      <div *ngIf="cities.length === 0" class="col-12 text-center text-muted">
+        <p *ngIf="!filters.partialName && !filters.country">Ingresa un destino o país para comenzar.</p>
+        <p *ngIf="filters.partialName || filters.country">No se encontraron ciudades con esos criterios.</p>
+      </div>
+
+      <div class="col-md-4 mb-4" *ngFor="let city of cities">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">{{ city.nombre }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{{ city.pais }} <small *ngIf="city.countryCode">({{ city.countryCode }})</small></h6>
+            <p class="card-text mt-3">
+              <strong>Región:</strong> {{ city.region || '-' }}<br>
+              <strong>Población:</strong> {{ city.poblacion | number }} <br>
+              <small class="text-muted">
+                Lat: {{ city.lat | number:'1.4-6' }}, Lon: {{ city.lon | number:'1.4-6' }}
+              </small>
+            </p>
+
+            <button class="btn btn-outline-info btn-sm w-100">
+              <i class="fa fa-map-marker"></i> Ver en mapa
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
