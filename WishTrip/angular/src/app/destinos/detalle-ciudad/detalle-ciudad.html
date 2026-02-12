@@ -1,0 +1,112 @@
+<div class="letterboxd-container" *ngIf="city">
+  
+  <div class="hero-backdrop" [style.backgroundImage]="'url(' + (city.imageUrl || 'https://placehold.co/1200x600/333/FFF') + ')'">
+    <div class="hero-overlay">
+      <div class="container py-5">
+        <button class="btn btn-sm btn-outline-light mb-4" (click)="volver()">
+            <i class="fa fa-arrow-left"></i> Volver
+        </button>
+
+        <div class="row">
+          <div class="col-md-3 text-center">
+            <div class="poster-card shadow-lg">
+                <img [src]="city.imageUrl || 'https://placehold.co/400x600/333/FFF?text='+city.nombre" 
+                     alt="{{ city.nombre }}" class="img-fluid rounded">
+            </div>
+            
+            <div class="d-grid gap-2 mt-3">
+                <button class="btn btn-success"><i class="fa fa-eye"></i> Registrar Visita</button>
+                <button class="btn btn-outline-light"><i class="fa fa-heart"></i> Favorito</button>
+                <button class="btn btn-outline-light"><i class="fa fa-clock"></i> Wishlist</button>
+            </div>
+          </div>
+
+          <div class="col-md-9 text-white info-col">
+            <h1 class="display-3 fw-bold">{{ city.nombre }}</h1>
+            <h4 class="text-white-50">{{ city.pais }} <span *ngIf="city.region">, {{ city.region }}</span></h4>
+            
+            <div class="stats mt-3 mb-4 d-flex gap-4">
+                <div class="rating">
+                    <span class="fs-4 text-warning">
+                        <i *ngFor="let star of getStars(ratingPromedio)" 
+                           class="fa" 
+                           [ngClass]="star ? 'fa-star' : 'fa-star-o'"></i>
+                    </span>
+                    <span class="ms-2 fw-bold">{{ ratingPromedio }}</span>
+                </div>
+                <div class="visits pt-1">
+                    <i class="fa fa-user"></i> {{ totalReviews | number }} visitas
+                </div>
+                <div class="population pt-1">
+                    <i class="fa fa-users"></i> {{ city.poblacion | number }} hab.
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="about-section mt-4">
+                <h5 class="text-uppercase text-white-50 fs-6">Acerca de</h5>
+                
+                <p class="lead description-text mb-2">
+                    {{ descripcion }}
+                </p>
+
+                <button *ngIf="tieneTextoLargo" 
+                        class="btn-ver-mas" 
+                        (click)="toggleDescripcion()">
+                    {{ mostrarTodo ? 'Ver menos' : 'Ver más' }}
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h5 class="section-title border-bottom pb-2 mb-4">Experiencias Populares</h5>
+            
+            <div class="review-card mb-4 d-flex gap-3" *ngFor="let review of reviews">
+                <img [src]="review.avatar" class="avatar rounded-circle" width="50" height="50">
+                <div class="review-content w-100">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="fw-bold text-white">{{ review.usuario }}</span>
+                            <span class="ms-2 text-warning text-xs">
+                                <i class="fa fa-star" *ngFor="let s of getStars(review.rating)"></i>
+                            </span>
+                        </div>
+                        <small class="text-muted">{{ review.fecha }}</small>
+                    </div>
+                    <p class="mt-2 text-white-50 mb-0">
+                        {{ review.texto }}
+                    </p>
+                    <div class="review-actions mt-2 text-muted fs-sm">
+                        <i class="fa fa-thumbs-up me-1"></i> 24
+                        <i class="fa fa-comment ms-3 me-1"></i> 3
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="sidebar-box p-3 rounded mb-4" style="background: #1c1c1c;">
+                <h6 class="text-white-50 text-uppercase mb-3">Tu Actividad</h6>
+                <p class="text-muted text-center py-3">No has registrado actividad en {{ city.nombre }} todavía.</p>
+                <button class="btn btn-outline-secondary w-100 btn-sm">Escribir reseña</button>
+            </div>
+
+            <div class="sidebar-box p-3 rounded" style="background: #1c1c1c;">
+                <h6 class="text-white-50 text-uppercase mb-3">Dónde quedarse</h6>
+                <div class="text-center">
+                    <button class="btn btn-primary w-100 btn-sm mb-2">
+                        <i class="fa fa-bed"></i> Buscar Hoteles
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>

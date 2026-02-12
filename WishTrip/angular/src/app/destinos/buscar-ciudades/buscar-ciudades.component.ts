@@ -1,12 +1,18 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpBackend } from '@angular/common/http';
+import { Router } from '@angular/router'; 
 import { CoreModule } from '@abp/ng.core';
 import { ThemeSharedModule } from '@abp/ng.theme.shared';
 import { CitySearchService } from '../../proxy/destinos/city-search.service';
 import { CityDto, CitySearchRequestDto } from '../../proxy/destinos/models';
-import { Subject, Subscription } from 'rxjs'; // Importar RxJS
-import { debounceTime } from 'rxjs/operators'; // Importar operador
+import { Subject, Subscription, of } from 'rxjs';
+import { debounceTime, catchError } from 'rxjs/operators';
+
+interface CityWithImage extends CityDto {
+  imageUrl?: string;
+}
 
 @Component({
   selector: 'app-buscar-ciudades',
@@ -18,17 +24,21 @@ import { debounceTime } from 'rxjs/operators'; // Importar operador
 export class BuscarCiudadesComponent implements OnInit, OnDestroy {
 
   private cityService = inject(CitySearchService);
+  private router = inject(Router); 
+  private http: HttpClient;
 
-  // Subject para manejar el debounce
+  constructor(private handler: HttpBackend) {
+      this.http = new HttpClient(handler);
+  }
+
   private searchDebouncer$: Subject<void> = new Subject();
   private debouncerSubscription!: Subscription;
 
-  cities: CityDto[] = [];
+  cities: CityWithImage[] = [];
   isLoading = false;
 
-  // pagination state
+  readonly pageSize = 10;
   page = 1;
-  pageSize = 10;
 
   filters = {
     partialName: '',
@@ -40,24 +50,19 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
   } as CitySearchRequestDto;
 
   ngOnInit() {
-    // 1. Configuramos el debounce: esperar 500ms tras dejar de escribir para buscar
     this.debouncerSubscription = this.searchDebouncer$
       .pipe(debounceTime(500))
       .subscribe(() => {
         this.search();
       });
-
-    // 2. ELIMINADO: Ya no se llama a this.search() automáticamente al iniciar.
   }
 
   ngOnDestroy() {
-    // Buena práctica: desuscribirse para evitar memory leaks
     if (this.debouncerSubscription) {
       this.debouncerSubscription.unsubscribe();
     }
   }
 
-  // Este método se llama cada vez que el usuario escribe una letra
   onInputChange() {
     this.searchDebouncer$.next();
   }
@@ -65,9 +70,10 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
   search() {
     const partial = (this.filters.partialName || '').toString().trim();
     const country = (this.filters.country || '').toString().trim();
-    
-    // Validación: Si no hay ni ciudad ni país, limpiamos y no buscamos
-    if (!partial && !country) {
+    const region = (this.filters.region || '').toString().trim();
+    const minPop = this.filters.minPopulation;
+
+    if (!partial && !country && !region && !minPop) {
       this.cities = [];
       return;
     }
@@ -76,19 +82,20 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
 
     const payload: any = {
       partialName: partial,
-      country: this.filters.country || undefined,
-      region: this.filters.region || undefined,
-      minPopulation: this.filters.minPopulation || undefined,
-      maxResultCount: this.pageSize || 10,
-      skipCount: (this.page - 1) * (this.pageSize || 10),
+      country: country || undefined,
+      region: region || undefined,
+      minPopulation: minPop || undefined,
+      maxResultCount: this.pageSize,
+      skipCount: (this.page - 1) * this.pageSize,
     };
 
-    // Si estás usando los proxys de ABP, asegúrate que payload coincida con CitySearchRequestDto
     this.cityService.searchCities(payload).subscribe({
       next: (res) => {
-        this.cities = (res.cities || []).slice();
-        // Ordenar por población descendente (si existe)
+        const rawCities = res.cities || [];
+        this.cities = rawCities.map((c: any) => ({ ...c } as CityWithImage));
         this.cities.sort((a, b) => (b.poblacion || 0) - (a.poblacion || 0));
+        
+        this.loadImagesByName();
         this.isLoading = false;
       },
       error: (err) => {
@@ -105,5 +112,42 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
     this.filters.minPopulation = undefined;
     this.page = 1;
     this.cities = [];
+  }
+
+  private loadImagesByName() {
+    this.cities.forEach(city => {
+        this.fetchWikiImage(city.nombre, city);
+    });
+  }
+
+  private fetchWikiImage(queryName: string, city: CityWithImage) {
+      const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(queryName)}&prop=pageimages&format=json&pithumbsize=500&origin=*`;
+
+      this.http.get(url).pipe(catchError(() => of(null))).subscribe((res: any) => {
+          if (res && res.query && res.query.pages) {
+              const pages = res.query.pages;
+              const pageId = Object.keys(pages)[0]; 
+              
+              if (pageId !== '-1' && pages[pageId] && pages[pageId].thumbnail) {
+                  city.imageUrl = pages[pageId].thumbnail.source;
+              } else {
+                 if (queryName === city.nombre) {
+                     this.fetchWikiImage(`${city.nombre}, ${city.pais}`, city);
+                 }
+              }
+          }
+      });
+  }
+
+  verEnMapa(city: CityWithImage) {
+    if (city.lat && city.lon) {
+      // CORRECCIÓN: URL correcta de Google Maps para abrir un marcador
+      const url = `https://www.google.com/maps/search/?api=1&query=${city.lat},${city.lon}`;
+      window.open(url, '_blank');
+    }
+  }
+
+  irADetalle(city: CityWithImage) {
+    this.router.navigate(['/destinos/detalle'], { state: { data: city } });
   }
 }

@@ -18,7 +18,7 @@ namespace WishTrip.Destinos
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<GeoDbCitySearchService> _logger;
-        private readonly int _maxLimit;
+        private const int MaxLimit = 10;
 
         public GeoDbCitySearchService(
             IHttpClientFactory httpClientFactory,
@@ -27,22 +27,15 @@ namespace WishTrip.Destinos
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
-
-            if (!int.TryParse(configuration["CitySearch:MaxLimit"], out _maxLimit) || _maxLimit <= 0)
-            {
-                _maxLimit = 10;
-            }
-            if (_maxLimit > 10) _maxLimit = 10;
         }
 
         public async Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request)
         {
             var result = new CitySearchResultDto();
-
             if (request == null) return result;
 
             var requested = request.MaxResultCount > 0 ? request.MaxResultCount : 10;
-            var limit = Math.Clamp(requested, 1, _maxLimit);
+            var limit = Math.Clamp(requested, 1, MaxLimit);
             var offset = Math.Max(request.SkipCount, 0);
 
             var client = _httpClientFactory.CreateClient();
@@ -52,6 +45,7 @@ namespace WishTrip.Destinos
 
             string? cityInput = request.PartialName?.Trim();
             string? countryInput = request.Country?.Trim();
+            string? regionInput = request.Region?.Trim();
 
             if (string.IsNullOrWhiteSpace(cityInput) && !string.IsNullOrWhiteSpace(request.Destination))
             {
@@ -64,48 +58,56 @@ namespace WishTrip.Destinos
                 cityInput = null;
             }
 
+            // Si solo hay región, la usamos como ciudad
+            if (string.IsNullOrWhiteSpace(countryInput) && string.IsNullOrWhiteSpace(cityInput) && !string.IsNullOrWhiteSpace(regionInput))
+            {
+                cityInput = regionInput;
+            }
+
             try
             {
-                string url = "";
                 string? resolvedIsoCode = null;
 
                 if (!string.IsNullOrWhiteSpace(countryInput))
                 {
                     resolvedIsoCode = await ResolveCountryIso2Async(client, countryInput);
+
+                    if (string.IsNullOrWhiteSpace(resolvedIsoCode))
+                    {
+                        return result;
+                    }
                 }
 
-                if (!string.IsNullOrWhiteSpace(cityInput) && !string.IsNullOrWhiteSpace(resolvedIsoCode))
+                var urlBuilder = new StringBuilder("https://geodb-free-service.wirefreethought.com/v1/geo/cities?");
+
+                urlBuilder.Append($"limit={limit}&offset={offset}&hateoasMode=false&sort=-population");
+
+                if (!string.IsNullOrWhiteSpace(resolvedIsoCode))
                 {
-                    url = $"https://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix={Uri.EscapeDataString(cityInput)}&countryIds={Uri.EscapeDataString(resolvedIsoCode)}&limit={limit}&offset={offset}&hateoasMode=false&sort=-population";
+                    urlBuilder.Append($"&countryIds={Uri.EscapeDataString(resolvedIsoCode)}");
                 }
-                else if (string.IsNullOrWhiteSpace(cityInput) && !string.IsNullOrWhiteSpace(resolvedIsoCode))
+
+                if (!string.IsNullOrWhiteSpace(cityInput))
                 {
-                    url = $"https://geodb-free-service.wirefreethought.com/v1/geo/countries/{Uri.EscapeDataString(resolvedIsoCode)}/cities?limit={limit}&offset={offset}&hateoasMode=false&sort=-population";
-                }
-                else if (!string.IsNullOrWhiteSpace(cityInput))
-                {
-                    url = $"https://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix={Uri.EscapeDataString(cityInput)}&limit={limit}&offset={offset}&hateoasMode=false&sort=-population";
-                }
-                else
-                {
-                    return result;
+                    urlBuilder.Append($"&namePrefix={Uri.EscapeDataString(cityInput)}");
                 }
 
                 if (request.MinPopulation.HasValue && request.MinPopulation.Value > 0)
                 {
-                    url += $"&minPopulation={request.MinPopulation.Value}";
+                    urlBuilder.Append($"&minPopulation={request.MinPopulation.Value}");
                 }
+
+                var url = urlBuilder.ToString();
 
                 var cities = await GetCitiesFromUrlAsync(client, url);
 
-                // --- LOGICA DE FILTRO DE REGION (INSENSIBLE A TILDES) ---
-                if (!string.IsNullOrWhiteSpace(request.Region))
+                if (!string.IsNullOrWhiteSpace(regionInput))
                 {
-                    var regionFilterNormalized = RemoveDiacritics(request.Region);
+                    var regionNormalized = RemoveDiacritics(regionInput);
 
                     cities = cities.Where(c =>
                         !string.IsNullOrWhiteSpace(c.Region) &&
-                        RemoveDiacritics(c.Region).Contains(regionFilterNormalized, StringComparison.OrdinalIgnoreCase)
+                        RemoveDiacritics(c.Region).Contains(regionNormalized, StringComparison.OrdinalIgnoreCase)
                     ).ToList();
                 }
 
@@ -114,28 +116,21 @@ namespace WishTrip.Destinos
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error crítico en GeoDbCitySearchService");
+                _logger.LogError(ex, "Error en GeoDbCitySearchService");
                 return result;
             }
         }
 
-        // Método Helper para eliminar tildes (á -> a, ü -> u, ñ se mantiene a veces o se cambia a n según normalización, aquí usamos FormD)
         private static string RemoveDiacritics(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return text;
-
             var normalizedString = text.Normalize(NormalizationForm.FormD);
             var stringBuilder = new StringBuilder();
-
             foreach (var c in normalizedString)
             {
-                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
-                {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
                     stringBuilder.Append(c);
-                }
             }
-
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
@@ -145,38 +140,32 @@ namespace WishTrip.Destinos
             {
                 using var resp = await client.GetAsync(url);
                 if (!resp.IsSuccessStatusCode) return new List<CityDto>();
-
                 var body = await resp.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    NumberHandling = JsonNumberHandling.AllowReadingFromString
-                };
-
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, NumberHandling = JsonNumberHandling.AllowReadingFromString };
                 var root = JsonSerializer.Deserialize<GeoDbResponseRoot>(body, options);
                 return root?.Data?.Select(MapGeoDbToDto).ToList() ?? new List<CityDto>();
             }
-            catch
-            {
-                return new List<CityDto>();
-            }
+            catch { return new List<CityDto>(); }
         }
 
         private async Task<string?> ResolveCountryIso2Async(HttpClient client, string countryName)
         {
-            var url = $"https://geodb-free-service.wirefreethought.com/v1/geo/countries?namePrefix={Uri.EscapeDataString(countryName)}&limit=1&offset=0&hateoasMode=false";
+            var url = $"https://geodb-free-service.wirefreethought.com/v1/geo/countries?namePrefix={Uri.EscapeDataString(countryName)}&limit=5&offset=0&hateoasMode=false";
             try
             {
                 using var resp = await client.GetAsync(url);
                 if (!resp.IsSuccessStatusCode) return null;
-
                 var body = await resp.Content.ReadAsStringAsync();
-                var root = JsonSerializer.Deserialize<GeoDbResponseRoot>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (root?.Data != null && root.Data.Any())
+                using var doc = JsonDocument.Parse(body);
+                if (doc.RootElement.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array)
                 {
-                    var country = root.Data.First();
-                    return country.Code ?? country.IsoCode ?? country.CountryCode;
+                    foreach (var item in data.EnumerateArray())
+                    {
+                        if (item.TryGetProperty("name", out var n) && string.Equals(n.GetString(), countryName, StringComparison.OrdinalIgnoreCase))
+                            return item.TryGetProperty("code", out var c) ? c.GetString() : null;
+                    }
+                    if (data.GetArrayLength() > 0)
+                        return data[0].TryGetProperty("code", out var c) ? c.GetString() : null;
                 }
             }
             catch { }
@@ -185,6 +174,9 @@ namespace WishTrip.Destinos
 
         private static CityDto MapGeoDbToDto(GeoDbCityData c) => new CityDto
         {
+            // IMPORTANTE: Mapeamos el ID de Wikidata
+            WikiDataId = c.WikiDataId,
+
             Nombre = c.Name ?? c.City ?? string.Empty,
             Pais = c.Country ?? string.Empty,
             CountryCode = c.CountryCode ?? c.Code ?? string.Empty,
@@ -195,12 +187,7 @@ namespace WishTrip.Destinos
         };
     }
 
-    public class GeoDbResponseRoot
-    {
-        [JsonPropertyName("data")]
-        public List<GeoDbCityData> Data { get; set; } = new();
-    }
-
+    public class GeoDbResponseRoot { [JsonPropertyName("data")] public List<GeoDbCityData> Data { get; set; } = new(); }
     public class GeoDbCityData
     {
         [JsonPropertyName("id")] public int Id { get; set; }
