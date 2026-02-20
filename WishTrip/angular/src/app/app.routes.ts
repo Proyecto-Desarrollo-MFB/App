@@ -1,5 +1,6 @@
 import { authGuard, permissionGuard } from '@abp/ng.core';
 import { Routes } from '@angular/router';
+import { DetalleCiudadComponent } from './destinos/detalle-ciudad/detalle-ciudad';
 
 
 export const APP_ROUTES: Routes = [
@@ -36,5 +37,9 @@ export const APP_ROUTES: Routes = [
     data: {
       requiredPolicy: 'WishTrip.CitySearch', 
     },
+  },
+  { 
+    path: 'destinos/detalle', 
+    component: DetalleCiudadComponent 
   },
 ];

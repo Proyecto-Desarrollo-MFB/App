@@ -8,6 +8,7 @@
         public string Region { get; set; }
         public int? Poblacion { get; set; }
         public double? Lat { get; set; }
-        public double? Lon { get; set; }
+        public double? Lon { get; set; } 
+        public string WikiDataId { get; set; }
     }
 }

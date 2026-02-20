@@ -5,55 +5,26 @@
     <div class="row mt-4 g-2">
       <div class="col-md-4">
         <label class="form-label">Destino</label>
-        <input type="text" class="form-control" 
-               [(ngModel)]="filters.partialName" 
-               (ngModelChange)="onInputChange()"
-               (keyup.enter)="search()" 
-               placeholder="Ej: Bariloche">
+        <input type="text" class="form-control" [(ngModel)]="filters.partialName" (ngModelChange)="onInputChange()" (keyup.enter)="search()">
       </div>
-
       <div class="col-md-3">
         <label class="form-label">País</label>
-        <input type="text" class="form-control" 
-               [(ngModel)]="filters.country" 
-               (ngModelChange)="onInputChange()"
-               (keyup.enter)="search()" 
-               placeholder="Ej: Argentina">
+        <input type="text" class="form-control" [(ngModel)]="filters.country" (ngModelChange)="onInputChange()" (keyup.enter)="search()">
       </div>
-
       <div class="col-md-3">
         <label class="form-label">Región</label>
-        <input type="text" class="form-control" 
-               [(ngModel)]="filters.region" 
-               (ngModelChange)="onInputChange()"
-               (keyup.enter)="search()" 
-               placeholder="Ej: Río Negro">
+        <input type="text" class="form-control" [(ngModel)]="filters.region" (ngModelChange)="onInputChange()" (keyup.enter)="search()" [disabled]="!filters.partialName && !filters.country" [title]="(!filters.partialName && !filters.country) ? 'Ingresa primero un Destino o País' : ''">
       </div>
-
       <div class="col-md-2 d-flex align-items-end gap-2">
-        <button class="btn btn-primary w-100" (click)="search()" [disabled]="isLoading">
-          <i class="fa fa-search"></i> Buscar
-        </button>
-        <button class="btn btn-secondary" (click)="clear()" [disabled]="isLoading">
-          <i class="fa fa-times"></i>
-        </button>
+        <button class="btn btn-primary w-100" (click)="search()" [disabled]="isLoading"><i class="fa fa-search"></i> Buscar</button>
+        <button class="btn btn-secondary" (click)="clear()" [disabled]="isLoading"><i class="fa fa-times"></i></button>
       </div>
     </div>
 
     <div class="row mt-3 g-2">
-      <div class="col-md-3">
+      <div class="col-md-4">
         <label class="form-label">Población mínima</label>
-        <input type="number" min="0" class="form-control" 
-               [(ngModel)]="filters.minPopulation" 
-               (ngModelChange)="onInputChange()"
-               placeholder="Ej: 10000">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Resultados por página</label>
-        <input type="number" min="1" class="form-control" 
-               [(ngModel)]="pageSize" 
-               (change)="page = 1; search()" 
-               placeholder="10">
+        <input type="number" min="0" class="form-control" [(ngModel)]="filters.minPopulation" (ngModelChange)="onInputChange()">
       </div>
     </div>
 
@@ -67,30 +38,55 @@
 
     <div class="row" *ngIf="!isLoading">
       <div *ngIf="cities.length === 0" class="col-12 text-center text-muted">
-        <p *ngIf="!filters.partialName && !filters.country">Ingresa un destino o país para comenzar.</p>
-        <p *ngIf="filters.partialName || filters.country">No se encontraron ciudades con esos criterios.</p>
+        <p *ngIf="!filters.partialName && !filters.country && !filters.region">Ingresa un criterio para comenzar.</p>
+        <p *ngIf="filters.partialName || filters.country || filters.region">No se encontraron ciudades con esos criterios.</p>
       </div>
 
       <div class="col-md-4 mb-4" *ngFor="let city of cities">
-        <div class="card h-100 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">{{ city.nombre }}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">{{ city.pais }} <small *ngIf="city.countryCode">({{ city.countryCode }})</small></h6>
-            <p class="card-text mt-3">
-              <strong>Región:</strong> {{ city.region || '-' }}<br>
-              <strong>Población:</strong> {{ city.poblacion | number }} <br>
-              <small class="text-muted">
-                Lat: {{ city.lat | number:'1.4-6' }}, Lon: {{ city.lon | number:'1.4-6' }}
-              </small>
-            </p>
+        
+        <div class="card h-100 shadow city-card" style="position: relative;">
+          
+          <div class="city-card-header" style="position: relative;">
+              <img [src]="city.imageUrl || 'https://placehold.co/600x400/555555/FFFFFF?text=' + city.nombre" 
+                   (error)="city.imageUrl = 'https://placehold.co/600x400/555555/FFFFFF?text=' + city.nombre"
+                   alt="{{ city.nombre }}" 
+                   class="city-image"
+                   (click)="irADetalle(city)"
+                   style="cursor: pointer; position: relative; z-index: 10;">
+          </div>
 
-            <button class="btn btn-outline-info btn-sm w-100">
-              <i class="fa fa-map-marker"></i> Ver en mapa
+          <div class="city-card-body" style="position: relative;">
+            
+            <h4 class="city-title" 
+                (click)="irADetalle(city)" 
+                style="cursor: pointer; text-decoration: underline; display: inline-block; position: relative; z-index: 10;">
+                {{ city.nombre }}
+            </h4>
+            
+            <h6 class="city-subtitle mb-3">{{ city.pais }} <small *ngIf="city.countryCode">({{ city.countryCode }})</small></h6>
+            
+            <div class="city-details mb-4">
+              <p class="mb-1">
+                <span class="detail-label">Región:</span> {{ city.region || '-' }}
+              </p>
+              <p class="mb-0">
+                <span class="detail-label">Población:</span> {{ city.poblacion | number }}
+              </p>
+            </div>
+            
+            <button class="btn btn-outline-light w-100" 
+                    (click)="verEnMapa(city)"
+                    style="position: relative; z-index: 5;">
+              <i class="fa fa-map me-2"></i> Ver en mapa
             </button>
+            
+            <small class="coords text-white-50 d-block mt-3">
+              Lat: {{ city.lat | number:'1.4-6' }}, Lon: {{ city.lon | number:'1.4-6' }}
+            </small>
           </div>
         </div>
+
       </div>
     </div>
-
   </div>
 </div>
