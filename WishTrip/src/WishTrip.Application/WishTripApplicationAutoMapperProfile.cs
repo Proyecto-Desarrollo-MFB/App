@@ -1,5 +1,5 @@
-using WishTrip.Destinos;
 using AutoMapper;
+using WishTrip.Destinos;
 
 namespace WishTrip;
 

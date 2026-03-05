@@ -15,14 +15,15 @@ export interface CityDto {
   poblacion?: number;
   lat?: number;
   lon?: number;
+  wikiDataId?: string;
 }
 
 export interface CitySearchRequestDto extends PagedAndSortedResultRequestDto {
   partialName?: string;
   destination?: string;
   country?: string;
-  region?: string;
   minPopulation?: number;
+  region?: string;
 }
 
 export interface CitySearchResultDto {

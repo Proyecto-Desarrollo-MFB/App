@@ -1,0 +1,59 @@
+$bg-dark: #14181c;
+$bg-box: #d4d4d4; 
+
+.settings-container {
+    background-color: $bg-dark;
+    min-height: 100vh;
+}
+
+.settings-box {
+    background-color: $bg-box;
+    border-radius: 12px;
+    padding: 30px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.title-header {
+    font-weight: 800;
+    text-transform: uppercase;
+    text-decoration: underline;
+    color: #0056b3; 
+    margin-bottom: 20px;
+}
+
+.tabs-header {
+    border-bottom: 1px solid #777;
+    display: flex;
+    gap: 40px;
+    padding-bottom: 15px;
+
+    .tab-btn {
+        background: none;
+        border: none;
+        font-weight: 700;
+        color: #333;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0;
+        
+        &.active {
+            color: #000;
+        }
+
+        &:hover {
+            color: #000;
+        }
+    }
+}
+
+.tab-content {
+    .form-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .danger-zone {
+        background-color: rgba(255, 0, 0, 0.05);
+    }
+}

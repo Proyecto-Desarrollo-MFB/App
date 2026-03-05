@@ -1678,6 +1678,281 @@
               "implementFrom": "Volo.Abp.Application.Services.IReadOnlyAppService<WishTrip.Destinos.DestinoDto,WishTrip.Destinos.DestinoDto,System.Guid,Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto>"
             }
           }
+        },
+        "WishTrip.Destinos.GeoDbCitySearchService": {
+          "controllerName": "GeoDbCitySearch",
+          "controllerGroupName": "GeoDbCitySearch",
+          "isRemoteService": true,
+          "isIntegrationService": false,
+          "apiVersion": null,
+          "type": "WishTrip.Destinos.GeoDbCitySearchService",
+          "interfaces": [
+            {
+              "type": "WishTrip.Destinos.ICitySearchService",
+              "name": "ICitySearchService",
+              "methods": [
+                {
+                  "name": "SearchCitiesAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "request",
+                      "typeAsString": "WishTrip.Destinos.CitySearchRequestDto, WishTrip.Application.Contracts",
+                      "type": "WishTrip.Destinos.CitySearchRequestDto",
+                      "typeSimple": "WishTrip.Destinos.CitySearchRequestDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "WishTrip.Destinos.CitySearchResultDto",
+                    "typeSimple": "WishTrip.Destinos.CitySearchResultDto"
+                  }
+                }
+              ]
+            }
+          ],
+          "actions": {
+            "SearchCitiesAsyncByRequest": {
+              "uniqueName": "SearchCitiesAsyncByRequest",
+              "name": "SearchCitiesAsync",
+              "httpMethod": "POST",
+              "url": "api/app/geo-db-city-search/search-cities",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "request",
+                  "typeAsString": "WishTrip.Destinos.CitySearchRequestDto, WishTrip.Application.Contracts",
+                  "type": "WishTrip.Destinos.CitySearchRequestDto",
+                  "typeSimple": "WishTrip.Destinos.CitySearchRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "request",
+                  "name": "request",
+                  "jsonName": null,
+                  "type": "WishTrip.Destinos.CitySearchRequestDto",
+                  "typeSimple": "WishTrip.Destinos.CitySearchRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "WishTrip.Destinos.CitySearchResultDto",
+                "typeSimple": "WishTrip.Destinos.CitySearchResultDto"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "WishTrip.Destinos.ICitySearchService"
+            }
+          }
+        },
+        "WishTrip.Users.UserProfileAppService": {
+          "controllerName": "UserProfile",
+          "controllerGroupName": "UserProfile",
+          "isRemoteService": true,
+          "isIntegrationService": false,
+          "apiVersion": null,
+          "type": "WishTrip.Users.UserProfileAppService",
+          "interfaces": [
+            {
+              "type": "WishTrip.Users.IUserProfileAppService",
+              "name": "IUserProfileAppService",
+              "methods": [
+                {
+                  "name": "GetProfileAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "userName",
+                      "typeAsString": "System.String, System.Private.CoreLib",
+                      "type": "System.String",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "WishTrip.Users.UserProfileDto",
+                    "typeSimple": "WishTrip.Users.UserProfileDto"
+                  }
+                },
+                {
+                  "name": "UpdateProfileAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "input",
+                      "typeAsString": "WishTrip.Users.UpdateProfileDto, WishTrip.Application.Contracts",
+                      "type": "WishTrip.Users.UpdateProfileDto",
+                      "typeSimple": "WishTrip.Users.UpdateProfileDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
+                },
+                {
+                  "name": "ChangePasswordAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "input",
+                      "typeAsString": "WishTrip.Users.ChangePasswordDto, WishTrip.Application.Contracts",
+                      "type": "WishTrip.Users.ChangePasswordDto",
+                      "typeSimple": "WishTrip.Users.ChangePasswordDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
+                },
+                {
+                  "name": "DeleteMyAccountAsync",
+                  "parametersOnMethod": [],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
+                }
+              ]
+            }
+          ],
+          "actions": {
+            "GetProfileAsyncByUserName": {
+              "uniqueName": "GetProfileAsyncByUserName",
+              "name": "GetProfileAsync",
+              "httpMethod": "GET",
+              "url": "api/app/user-profile/profile",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "userName",
+                  "typeAsString": "System.String, System.Private.CoreLib",
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "userName",
+                  "name": "userName",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "WishTrip.Users.UserProfileDto",
+                "typeSimple": "WishTrip.Users.UserProfileDto"
+              },
+              "allowAnonymous": true,
+              "implementFrom": "WishTrip.Users.IUserProfileAppService"
+            },
+            "UpdateProfileAsyncByInput": {
+              "uniqueName": "UpdateProfileAsyncByInput",
+              "name": "UpdateProfileAsync",
+              "httpMethod": "PUT",
+              "url": "api/app/user-profile/profile",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "WishTrip.Users.UpdateProfileDto, WishTrip.Application.Contracts",
+                  "type": "WishTrip.Users.UpdateProfileDto",
+                  "typeSimple": "WishTrip.Users.UpdateProfileDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "WishTrip.Users.UpdateProfileDto",
+                  "typeSimple": "WishTrip.Users.UpdateProfileDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "WishTrip.Users.IUserProfileAppService"
+            },
+            "ChangePasswordAsyncByInput": {
+              "uniqueName": "ChangePasswordAsyncByInput",
+              "name": "ChangePasswordAsync",
+              "httpMethod": "POST",
+              "url": "api/app/user-profile/change-password",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "WishTrip.Users.ChangePasswordDto, WishTrip.Application.Contracts",
+                  "type": "WishTrip.Users.ChangePasswordDto",
+                  "typeSimple": "WishTrip.Users.ChangePasswordDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "WishTrip.Users.ChangePasswordDto",
+                  "typeSimple": "WishTrip.Users.ChangePasswordDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "WishTrip.Users.IUserProfileAppService"
+            },
+            "DeleteMyAccountAsync": {
+              "uniqueName": "DeleteMyAccountAsync",
+              "name": "DeleteMyAccountAsync",
+              "httpMethod": "DELETE",
+              "url": "api/app/user-profile/my-account",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "WishTrip.Users.IUserProfileAppService"
+            }
+          }
         }
       }
     },
@@ -9451,6 +9726,78 @@
           "minimum": null,
           "maximum": null,
           "regex": null
+        },
+        {
+          "name": "CountryCode",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Region",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Poblacion",
+          "jsonName": null,
+          "type": "System.Int32?",
+          "typeSimple": "number?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Lat",
+          "jsonName": null,
+          "type": "System.Double?",
+          "typeSimple": "number?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Lon",
+          "jsonName": null,
+          "type": "System.Double?",
+          "typeSimple": "number?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "WikiDataId",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
         }
       ]
     },
@@ -9487,6 +9834,30 @@
         },
         {
           "name": "Country",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "MinPopulation",
+          "jsonName": null,
+          "type": "System.Int32?",
+          "typeSimple": "number?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Region",
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",
@@ -9659,6 +10030,189 @@
           "type": "System.String",
           "typeSimple": "string",
           "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "WishTrip.Users.ChangePasswordDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "CurrentPassword",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "NewPassword",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "WishTrip.Users.UpdateProfileDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "UserName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Name",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Bio",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "AvatarUrl",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Email",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "WishTrip.Users.UserProfileDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Id",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "UserName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Name",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Email",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Bio",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "AvatarUrl",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
           "minLength": null,
           "maxLength": null,
           "minimum": null,

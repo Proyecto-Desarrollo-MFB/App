@@ -1,2 +1,3 @@
 import * as Destinos from './destinos';
-export { Destinos };
+import * as Users from './users';
+export { Destinos, Users };
