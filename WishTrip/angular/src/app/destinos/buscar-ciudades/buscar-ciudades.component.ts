@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpBackend } from '@angular/common/http';
-import { Router } from '@angular/router'; 
+import { Router, RouterLink } from '@angular/router'; 
 import { CoreModule } from '@abp/ng.core';
 import { ThemeSharedModule } from '@abp/ng.theme.shared';
 import { CitySearchService } from '../../proxy/destinos/city-search.service';
@@ -17,7 +17,7 @@ interface CityWithImage extends CityDto {
 @Component({
   selector: 'app-buscar-ciudades',
   standalone: true,
-  imports: [CommonModule, FormsModule, CoreModule, ThemeSharedModule],
+  imports: [CommonModule, FormsModule, CoreModule, ThemeSharedModule, RouterLink],
   templateUrl: './buscar-ciudades.component.html',
   styleUrls: ['./buscar-ciudades.component.scss']
 })
@@ -50,6 +50,19 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
   } as CitySearchRequestDto;
 
   ngOnInit() {
+    // 1. MAGIA: Al iniciar, chequeamos si venimos de la pantalla de detalle y hay algo guardado
+    const savedFilters = sessionStorage.getItem('citySearchFilters');
+    const savedResults = sessionStorage.getItem('citySearchResults');
+
+    if (savedFilters && savedResults) {
+      this.filters = JSON.parse(savedFilters);
+      this.cities = JSON.parse(savedResults);
+
+      // Limpiamos la memoria para que sea de un solo uso (así si va al Home, no queda guardado)
+      sessionStorage.removeItem('citySearchFilters');
+      sessionStorage.removeItem('citySearchResults');
+    }
+
     this.debouncerSubscription = this.searchDebouncer$
       .pipe(debounceTime(500))
       .subscribe(() => {
@@ -112,6 +125,10 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
     this.filters.minPopulation = undefined;
     this.page = 1;
     this.cities = [];
+    
+    // Si limpia manual, aseguramos de borrar todo rastro
+    sessionStorage.removeItem('citySearchFilters');
+    sessionStorage.removeItem('citySearchResults');
   }
 
   private loadImagesByName() {
@@ -141,13 +158,16 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
 
   verEnMapa(city: CityWithImage) {
     if (city.lat && city.lon) {
-      // CORRECCIÓN: URL correcta de Google Maps para abrir un marcador
       const url = `https://www.google.com/maps/search/?api=1&query=${city.lat},${city.lon}`;
       window.open(url, '_blank');
     }
   }
 
   irADetalle(city: CityWithImage) {
+    // 2. MAGIA: Justo antes de ir al detalle, guardamos exactamente cómo estaba todo
+    sessionStorage.setItem('citySearchFilters', JSON.stringify(this.filters));
+    sessionStorage.setItem('citySearchResults', JSON.stringify(this.cities));
+
     this.router.navigate(['/destinos/detalle'], { state: { data: city } });
   }
 }

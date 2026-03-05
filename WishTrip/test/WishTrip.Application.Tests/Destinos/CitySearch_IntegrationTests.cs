@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Shouldly;
 using WishTrip.Destinos;
@@ -20,7 +22,11 @@ public class CitySearch_IntegrationTests
         _httpClientFactory = Substitute.For<IHttpClientFactory>();
         _httpClientFactory.CreateClient(Arg.Any<string>()).Returns(httpClient);
 
-        _service = new GeoDbCitySearchService(_httpClientFactory);
+        // Agregamos el Logger y la Configuración falsa para que no falle el constructor
+        var logger = NullLogger<GeoDbCitySearchService>.Instance;
+        var configuration = Substitute.For<IConfiguration>();
+
+        _service = new GeoDbCitySearchService(_httpClientFactory, logger, configuration);
     }
 
     // Caso 1 y 2: Recibe resultados reales y mapea DTOs
@@ -57,7 +63,11 @@ public class CitySearch_IntegrationTests
         var badFactory = Substitute.For<IHttpClientFactory>();
         badFactory.CreateClient(Arg.Any<string>()).Returns(badClient);
 
-        var serviceWithError = new GeoDbCitySearchService(badFactory);
+        // Agregamos el Logger y la Configuración falsa para el servicio con error
+        var logger = NullLogger<GeoDbCitySearchService>.Instance;
+        var configuration = Substitute.For<IConfiguration>();
+
+        var serviceWithError = new GeoDbCitySearchService(badFactory, logger, configuration);
 
         // Act
         var result = await serviceWithError.SearchCitiesAsync(new CitySearchRequestDto { PartialName = "Paris" });

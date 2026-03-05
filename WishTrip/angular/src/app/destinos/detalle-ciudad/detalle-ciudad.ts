@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router'; // <-- AGREGAMOS RouterLink
 import { HttpClient, HttpBackend } from '@angular/common/http';
 
 @Component({
   selector: 'app-detalle-ciudad',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink], // <-- LO SUMAMOS A LOS IMPORTS
   // CORREGIDO: Nombres de archivo sin .component
   templateUrl: './detalle-ciudad.html',
   styleUrls: ['./detalle-ciudad.scss']
@@ -47,10 +47,6 @@ export class DetalleCiudadComponent implements OnInit {
     if (this.city) {
       this.obtenerDescripcionWikipedia(this.city.nombre);
     }
-  }
-
-  volver() {
-    this.location.back();
   }
 
   obtenerDescripcionWikipedia(nombre: string) {

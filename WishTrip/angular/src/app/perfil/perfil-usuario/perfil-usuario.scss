@@ -1,0 +1,57 @@
+$bg-dark: #14181c;
+$text-primary: #fff;
+$text-secondary: #9ab;
+
+.letterboxd-profile {
+  background-color: $bg-dark;
+  min-height: 100vh;
+  font-family: 'Graphik', Helvetica, Arial, sans-serif;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-width: 3px !important;
+}
+
+.letter-spacing {
+  letter-spacing: 1px;
+  font-size: 0.75rem;
+}
+
+.bio-text {
+  max-width: 600px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.poster-card {
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+    border-color: #00e054; // Verde característico de Letterboxd
+    
+    .poster-overlay {
+      opacity: 1;
+    }
+  }
+
+  .poster-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    color: white;
+    padding: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    text-align: center;
+  }
+}
