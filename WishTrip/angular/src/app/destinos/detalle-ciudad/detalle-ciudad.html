@@ -4,32 +4,33 @@
     <div class="hero-overlay">
       <div class="container py-5">
         <div class="row">
+          
           <div class="col-md-3 text-center">
             <div class="poster-card shadow-lg">
               <img [src]="city.imageUrl || 'https://placehold.co/400x600/333/FFF?text='+city.nombre"
                    alt="{{ city.nombre }}" class="img-fluid rounded">
             </div>
 
-            <!-- Panel de actividad -->
             <div *ngIf="isLoggedIn" class="activity-panel mt-3">
 
               <div class="activity-icons d-flex justify-content-around py-3 border-bottom border-secondary">
-
+                
                 <div class="activity-icon-item text-center">
                   <div class="activity-icon"
-                       [class.active-green]="myExperience"
-                       (click)="openExperienceModal()"
-                       title="{{ myExperience ? 'Editar última visita' : 'Registrar visita' }}">
+                       [class.active-green]="myPreference?.isVisited"
+                       (click)="toggleVisitado()"
+                       style="cursor: pointer;"
+                       title="{{ myPreference?.isVisited ? 'Desmarcar como visitado' : 'Marcar como visitado' }}">
                     <i class="fa fa-eye fa-lg"></i>
                   </div>
                   <small class="d-block mt-1" style="font-size: 0.7rem; color: #9ab;">
-                    {{ myExperience ? 'Visitado' : 'Visitar' }}
+                    {{ myPreference?.isVisited ? 'Visitado' : 'Visitar' }}
                   </small>
                 </div>
 
                 <div class="activity-icon-item text-center">
                   <div class="activity-icon"
-                       [class.active-orange]="myPreference?.isFavorite"
+                       [class.active-green]="myPreference?.isFavorite"
                        (click)="toggleFavorito()"
                        style="cursor: pointer;"
                        title="{{ myPreference?.isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos' }}">
@@ -41,7 +42,11 @@
                 </div>
 
                 <div class="activity-icon-item text-center">
-                  <div class="activity-icon" title="Agregar a Wishlist">
+                  <div class="activity-icon"
+                       [class.active-green]="myPreference?.isWishlist"
+                       (click)="toggleWishlist()"
+                       style="cursor: pointer;"
+                       title="{{ myPreference?.isWishlist ? 'Quitar de wishlist' : 'Agregar a wishlist' }}">
                     <i class="fa fa-clock-o fa-lg"></i>
                   </div>
                   <small class="d-block mt-1" style="font-size: 0.7rem; color: #9ab;">Wishlist</small>
@@ -49,10 +54,19 @@
 
               </div>
 
-              <!-- Rating general independiente -->
               <div class="py-3 border-bottom border-secondary">
-                <small class="text-white-50 d-block mb-2"
-                       style="font-size: 0.75rem; letter-spacing: 1px;">TU PUNTUACIÓN</small>
+                <div class="d-flex justify-content-between align-items-center mb-2 px-3">
+                  <small class="text-white-50" style="font-size: 0.75rem; letter-spacing: 1px;">TU PUNTUACIÓN</small>
+                  
+                  <i *ngIf="myPreference?.rating > 0"
+                     class="fa fa-times"
+                     style="color: #ff4d4d; cursor: pointer; font-size: 0.95rem; transition: transform 0.2s;"
+                     onmouseover="this.style.transform='scale(1.2)'"
+                     onmouseout="this.style.transform='scale(1)'"
+                     (click)="clearRating()"
+                     title="Eliminar mi puntuación"></i>
+                </div>
+                
                 <div class="d-flex justify-content-center gap-1">
                   <i *ngFor="let star of getStarsArray()"
                      class="fa fa-lg"
@@ -61,19 +75,19 @@
                      (click)="cambiarRating(star)"
                      [title]="star + ' estrellas'"></i>
                 </div>
-                <small *ngIf="!myPreference?.rating" class="text-muted d-block mt-1"
+                <small *ngIf="!myPreference?.rating" class="text-muted d-block mt-1 text-center"
                        style="font-size: 0.7rem;">Hacé clic para puntuar</small>
               </div>
 
-              <!-- Acciones -->
               <div class="py-2">
-                <button class="activity-action-btn w-100 text-start"
-                        (click)="openExperienceModal()">
-                  <i class="fa fa-pencil me-2" style="color: #9ab;"></i>
-                  {{ myExperience ? 'Editar última experiencia...' : 'Registrar visita...' }}
-                </button>
-                <button *ngIf="myExperience"
+                <button *ngIf="myExperiencesList && myExperiencesList.length > 0"
                         class="activity-action-btn w-100 text-start"
+                        (click)="openMyExperiencesModal()">
+                  <i class="fa fa-list me-2" style="color: #9ab;"></i>
+                  Mis experiencias...
+                </button>
+
+                <button class="activity-action-btn w-100 text-start"
                         (click)="openNewExperienceModal()">
                   <i class="fa fa-plus me-2" style="color: #9ab;"></i>
                   Añadir nueva visita...
@@ -83,7 +97,7 @@
             </div>
 
             <div *ngIf="!isLoggedIn" class="mt-3">
-              <button class="btn btn-success w-100">
+              <button class="btn w-100 text-white" style="background-color: #00c030; border: none;">
                 <i class="fa fa-sign-in me-1"></i> Iniciá sesión para registrar
               </button>
             </div>
@@ -106,7 +120,7 @@
                 <span class="ms-2 fw-bold">{{ ratingPromedio || '-' }}</span>
               </div>
               <div class="visits pt-1">
-                <i class="fa fa-user"></i> {{ totalReviews | number }} visitas
+                <i class="fa fa-user"></i> {{ totalVisitas | number }} visitas
               </div>
               <div class="population pt-1">
                 <i class="fa fa-users"></i> {{ city.poblacion | number }} hab.
@@ -130,9 +144,9 @@
 
   <div class="container py-5">
     <div class="row">
+      
       <div class="col-md-8">
-
-        <h5 class="section-title border-bottom pb-2 mb-4">Reviews Populares</h5>
+        <h5 class="section-title border-bottom pb-2 mb-4">Reviews Recientes</h5>
 
         <div class="mb-4">
           <div class="input-group mb-2">
@@ -196,47 +210,53 @@
 
         <div class="review-card mb-4 d-flex gap-3" *ngFor="let review of reviews">
           <img [src]="review.userAvatarUrl"
-               class="avatar rounded-circle" width="50" height="50">
+               class="avatar rounded-circle border" style="background-color: #f8f9fa;" width="50" height="50">
           <div class="review-content w-100">
-            <div class="d-flex justify-content-between">
-              <div>
-                <span class="fw-bold text-white"
-                      style="cursor: pointer; text-decoration: underline;"
-                      (click)="router.navigate(['/perfil', review.userName])">
-                  {{ review.userName }}
-                </span>
-                <span class="ms-2 text-warning">
-                  <i *ngFor="let star of getStars(review.rating)"
-                     class="fa"
-                     [ngClass]="star ? 'fa-star' : 'fa-star-o'"
-                     style="font-size: 0.8rem;"></i>
-                </span>
+            
+            <div class="d-flex justify-content-between align-items-start">
+              
+              <div> <div class="d-flex align-items-center flex-wrap">
+                  <span class="fw-bold text-white"
+                        style="cursor: pointer; text-decoration: underline;"
+                        (click)="router.navigate(['/perfil', review.userName])">
+                    {{ review.userName }}
+                  </span>
+                  
+                  <span class="ms-2 text-warning">
+                    <i *ngFor="let star of getStars(review.rating)" class="fa" [ngClass]="star ? 'fa-star' : 'fa-star-o'" style="font-size: 0.8rem;"></i>
+                  </span>
+
+                  <span *ngIf="review.isFavorite" class="ms-2" style="color: #ff4d4d; font-size: 0.9rem;" title="Marcado como favorito"><i class="fa fa-heart"></i></span>
+                  <span *ngIf="review.isRepeatVisit" class="ms-2 text-info" style="font-size: 0.9rem;" title="Visita repetida"><i class="fa fa-repeat"></i></span>
+                </div>
+
+                <small class="d-block mt-1" style="color: #00c030; font-size: 0.8rem;">
+                  <i class="fa fa-calendar-check-o me-1"></i>
+                  Viaje: {{ review.startDate | date:'dd MMM yyyy' }}
+                  <ng-container *ngIf="review.endDate && review.endDate !== review.startDate">
+                    al {{ review.endDate | date:'dd MMM yyyy' }} 
+                    <span class="text-white-50 ms-1">({{ calcularDiasViaje(review.startDate, review.endDate) }} días)</span>
+                  </ng-container>
+                </small>
               </div>
-              <div class="d-flex align-items-center gap-2">
-                <small class="text-muted">{{ review.creationTime | date:'dd MMM yyyy' }}</small>
+              
+              <div class="d-flex align-items-center gap-2"> <small class="text-muted">{{ review.creationTime | date:'dd MMM yyyy' }}</small>
+                
                 <ng-container *ngIf="review.userName === currentUserName">
-                  <button class="btn btn-sm btn-outline-secondary"
-                          style="padding: 2px 8px; font-size: 0.75rem;"
-                          (click)="editarReview(review)"
-                          title="Editar">
+                  <button class="btn btn-sm btn-outline-secondary py-0 px-1" (click)="editarReview(review)" title="Editar">
                     <i class="fa fa-pencil"></i>
                   </button>
-                  <button class="btn btn-sm btn-outline-danger"
-                          style="padding: 2px 8px; font-size: 0.75rem;"
-                          (click)="eliminarReview(review)"
-                          title="Eliminar">
+                  <button class="btn btn-sm btn-outline-danger py-0 px-1" (click)="eliminarReview(review)" title="Eliminar">
                     <i class="fa fa-trash"></i>
                   </button>
                 </ng-container>
               </div>
+              
             </div>
-            <p *ngIf="review.review" class="mt-2 text-white-50 mb-0"
-               [innerHTML]="resaltarTexto(review.review)"></p>
-            <p *ngIf="!review.review" class="mt-2 text-muted fst-italic mb-0"
-               style="font-size: 0.85rem;">Sin reseña escrita</p>
+            
+            <p class="mt-2 text-white-50 mb-0" [innerHTML]="resaltarTexto(review.review!)"></p>
           </div>
         </div>
-
       </div>
 
       <div class="col-md-4">
@@ -246,19 +266,19 @@
             <a [href]="bookingUrl"
                target="_blank"
                rel="noopener noreferrer"
-               class="btn btn-primary w-100 btn-sm mb-2">
+               class="btn w-100 btn-sm mb-2 text-white" style="background-color: #00c030; border: none;">
               <i class="fa fa-bed me-1"></i> Buscar Hospedajes
             </a>
           </div>
         </div>
       </div>
+      
     </div>
   </div>
 
-  <!-- Modal confirmación eliminar review -->
   <div *ngIf="showConfirmModal"
        style="position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-              display: flex; align-items: center; justify-content: center; z-index: 9999;">
+              display: flex; align-items: center; justify-content: center; z-index: 10000;">
     <div style="background: #2c3440; border-radius: 12px; padding: 32px 28px;
                 min-width: 320px; max-width: 420px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
 
@@ -277,6 +297,83 @@
         <button class="btn btn-danger px-4" (click)="confirmarEliminarReview()">
           <i class="fa fa-trash me-1"></i> Eliminar
         </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showCannotUnvisitAlert"
+       style="position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+              display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div style="background: #2c3440; border-radius: 12px; padding: 32px 28px;
+                min-width: 320px; max-width: 420px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+      <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+        <i class="fa fa-exclamation-triangle" style="color: #ffc107; font-size: 1.5rem;"></i>
+        <span style="font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 1px;">Atención</span>
+      </div>
+      <p class="text-white-50 mb-4" style="font-size: 0.95rem; line-height: 1.5;">
+        No podés desmarcar este destino porque tenés experiencias registradas. Para hacerlo, primero debés eliminar tus visitas desde el botón <b>"Mis experiencias..."</b>.
+      </p>
+      <button class="btn px-4 text-white fw-bold" style="background-color: #00c030; border: none;" (click)="cerrarAlertaUnvisit()">
+        Entendido
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="showSelectExperienceModal"
+       style="position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+              display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div style="background: #2c3440; border-radius: 12px; padding: 24px;
+                min-width: 320px; max-width: 550px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+      
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary pb-2">
+        <h5 class="text-white m-0">Mis experiencias</h5>
+        <i class="fa fa-times text-white-50" 
+           style="cursor:pointer; font-size: 1.2rem; transition: color 0.2s;" 
+           onmouseover="this.style.color='#fff'" 
+           onmouseout="this.style.color='rgba(255,255,255,0.5)'" 
+           (click)="cerrarSelectExperienceModal()"></i>
+      </div>
+      
+      <div class="list-group" style="max-height: 350px; overflow-y: auto;">
+        <div *ngFor="let exp of myExperiencesList" 
+             class="list-group-item bg-dark text-white border-secondary mb-2 rounded d-flex flex-column"
+             style="border: 1px solid #444;">
+          
+          <div class="d-flex w-100 justify-content-between align-items-start">
+            <div>
+              <h6 class="mb-1 fw-bold" style="color: #00c030 !important;">
+                <i class="fa fa-calendar me-2"></i>{{ exp.startDate | date:'dd MMM yyyy' }}
+              </h6>
+              
+              <div class="d-flex align-items-center">
+                <small>
+                  <i *ngFor="let star of getStarsArray()" class="fa" 
+                     [ngClass]="star <= exp.rating ? 'fa-star text-warning' : 'fa-star-o text-muted'"></i>
+                </small>
+                
+                <span *ngIf="exp.isFavorite" class="ms-2" style="color: #ff4d4d; font-size: 0.9rem;" title="Marcado como favorito"><i class="fa fa-heart"></i></span>
+                <span *ngIf="exp.isRepeatVisit" class="ms-2 text-info" style="font-size: 0.9rem;" title="Visita repetida"><i class="fa fa-repeat"></i></span>
+              </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-secondary border-0" 
+                      title="Editar" 
+                      (click)="seleccionarExperienciaParaEditar(exp)">
+                <i class="fa fa-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger border-0" 
+                      title="Eliminar" 
+                      (click)="eliminarReview(exp)">
+                <i class="fa fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <p class="mb-1 text-white-50 small mt-2" style="white-space: normal;">
+            {{ exp.review || 'Sin reseña escrita' }}
+          </p>
+        </div>
       </div>
     </div>
   </div>

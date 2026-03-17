@@ -19,6 +19,13 @@ export interface DestinationReviewDto extends EntityDto<string> {
   startDate?: string;
   endDate?: string;
   creationTime?: string;
+  isRepeatVisit: boolean;
+}
+
+export interface DestinationStatsDto {
+  averageRating: number;
+  totalRatings: number;
+  totalVisits: number;
 }
 
 export interface TravelExperienceDto extends FullAuditedEntityDto<string> {
@@ -30,6 +37,22 @@ export interface TravelExperienceDto extends FullAuditedEntityDto<string> {
   isRepeatVisit: boolean;
   startDate?: string;
   endDate?: string;
+}
+
+export interface UpdateUserPreferenceDto {
+  rating: number;
+  isFavorite: boolean;
+  isWishlist: boolean;
+  isVisited: boolean;
+}
+
+export interface UserDestinationPreferenceDto {
+  id?: string;
+  destinationId?: string;
+  rating: number;
+  isFavorite: boolean;
+  isWishlist: boolean;
+  isVisited: boolean;
 }
 
 export interface UserExperienceDto extends FullAuditedEntityDto<string> {

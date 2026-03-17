@@ -29,6 +29,7 @@ public class WishTripDbContext :
     public DbSet<Calificacion> Calificaciones { get; set; }
     public DbSet<TravelExperience> TravelExperiences { get; set; }
     public ICurrentUser CurrentUser { get; set; }
+    public DbSet<UserDestinationPreference> UserDestinationPreferences { get; set; }
 
     #region Entities from the modules
 
@@ -96,6 +97,16 @@ public class WishTripDbContext :
             b.ToTable(WishTripConsts.DbTablePrefix + "TravelExperiences", WishTripConsts.DbSchema);
             b.ConfigureByConvention();
             b.Property(x => x.Review).HasMaxLength(2000);
+        });
+
+        builder.Entity<UserDestinationPreference>(b =>
+        {
+            b.ToTable(WishTripConsts.DbTablePrefix + "UserDestinationPreferences", WishTripConsts.DbSchema);
+            b.ConfigureByConvention();
+
+            // ESTA LÍNEA ES CLAVE: Garantiza que la combinación UserId + DestinationId sea única, 
+            // así nunca vas a tener dos "paneles" distintos para el mismo destino y usuario.
+            b.HasIndex(x => new { x.UserId, x.DestinationId }).IsUnique();
         });
 
         /* Configure your own tables/entities inside here */

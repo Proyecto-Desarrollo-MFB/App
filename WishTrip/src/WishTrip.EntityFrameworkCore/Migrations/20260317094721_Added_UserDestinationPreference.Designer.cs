@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 using WishTrip.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using WishTrip.EntityFrameworkCore;
 namespace WishTrip.Migrations
 {
     [DbContext(typeof(WishTripDbContext))]
-    partial class WishTripDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260317094721_Added_UserDestinationPreference")]
+    partial class Added_UserDestinationPreference
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1930,9 +1933,6 @@ namespace WishTrip.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<bool>("IsFavorite")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVisited")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsWishlist")

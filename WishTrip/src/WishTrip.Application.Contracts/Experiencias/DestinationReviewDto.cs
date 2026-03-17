@@ -13,5 +13,6 @@ namespace WishTrip.TravelExperiences
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public DateTime CreationTime { get; set; }
+        public bool IsRepeatVisit { get; set; }
     }
 }

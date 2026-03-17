@@ -1,4 +1,4 @@
-import type { CreateUpdateTravelExperienceDto, DestinationReviewDto, TravelExperienceDto, UserExperienceDto } from './models';
+import type { CreateUpdateTravelExperienceDto, DestinationReviewDto, DestinationStatsDto, TravelExperienceDto, UpdateUserPreferenceDto, UserDestinationPreferenceDto, UserExperienceDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
@@ -43,6 +43,22 @@ export class TravelExperienceService {
     { apiName: this.apiName,...config });
   
 
+  getDestinationStats = (destinationId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, DestinationStatsDto>({
+      method: 'GET',
+      url: `/api/app/travel-experience/destination-stats/${destinationId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  getMyExperiencesByDestination = (destinationId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, TravelExperienceDto[]>({
+      method: 'GET',
+      url: `/api/app/travel-experience/my-experiences-by-destination/${destinationId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
   getReviewsByDestination = (destinationId: string, config?: Partial<Rest.Config>) =>
     this.restService.request<any, DestinationReviewDto[]>({
       method: 'GET',
@@ -51,10 +67,35 @@ export class TravelExperienceService {
     { apiName: this.apiName,...config });
   
 
+  getUserPreference = (destinationId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, UserDestinationPreferenceDto>({
+      method: 'GET',
+      url: `/api/app/travel-experience/user-preference/${destinationId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  syncHistoricalPreferences = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, void>({
+      method: 'POST',
+      url: '/api/app/travel-experience/sync-historical-preferences',
+    },
+    { apiName: this.apiName,...config });
+  
+
   update = (id: string, input: CreateUpdateTravelExperienceDto, config?: Partial<Rest.Config>) =>
     this.restService.request<any, TravelExperienceDto>({
       method: 'PUT',
       url: `/api/app/travel-experience/${id}`,
+      body: input,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  updateUserPreference = (destinationId: string, input: UpdateUserPreferenceDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, UserDestinationPreferenceDto>({
+      method: 'PUT',
+      url: `/api/app/travel-experience/user-preference/${destinationId}`,
       body: input,
     },
     { apiName: this.apiName,...config });

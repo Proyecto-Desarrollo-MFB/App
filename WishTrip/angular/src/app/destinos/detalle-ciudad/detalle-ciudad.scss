@@ -170,6 +170,19 @@ mark {
   }
 }
 
+.active-green {
+  color: #00c030 !important;
+  text-shadow: 0 0 8px rgba(0, 192, 48, 0.4); /* Opcional: le da un brillito premium */
+}
+
+.activity-icon {
+  transition: color 0.2s ease-in-out;
+}
+
+.activity-icon:hover {
+  color: #00c030;
+}
+
 mark {
   background-color: #ffd700;
   color: #000;

@@ -13,5 +13,10 @@ namespace WishTrip.TravelExperiences
         Task<TravelExperienceDto?> GetByDestinationAsync(Guid destinationId);
         Task<List<UserExperienceDto>> GetByUserNameAsync(string userName);
         Task<List<DestinationReviewDto>> GetReviewsByDestinationAsync(Guid destinationId); // ← NUEVO
+        Task<UserDestinationPreferenceDto?> GetUserPreferenceAsync(Guid destinationId);
+        Task<UserDestinationPreferenceDto> UpdateUserPreferenceAsync(Guid destinationId, UpdateUserPreferenceDto input);
+        Task<DestinationStatsDto> GetDestinationStatsAsync(Guid destinationId);
+        Task<List<TravelExperienceDto>> GetMyExperiencesByDestinationAsync(Guid destinationId);
+        Task SyncHistoricalPreferencesAsync();
     }
 }

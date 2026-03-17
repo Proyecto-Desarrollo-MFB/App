@@ -26,13 +26,15 @@ export class DetalleCiudadComponent implements OnInit {
   tieneTextoLargo: boolean = false;
 
   ratingPromedio: number = 0;
-  totalReviews: number = 0;
+  totalVisitas = 0;
 
   showExperienceModal = false;
+  showCannotUnvisitAlert = false;
   currentExperience?: TravelExperienceDto;
   resolvedDestinationId?: string;
 
   myExperience?: TravelExperienceDto;
+  myPreference?: any; // Esto guardará los datos del panel actual
   isLoggedIn = false;
   currentUserName = '';
 
@@ -45,6 +47,9 @@ export class DetalleCiudadComponent implements OnInit {
 
   showConfirmModal = false;
   reviewToDelete: any = null;
+
+  myExperiencesList: TravelExperienceDto[] = [];
+  showSelectExperienceModal = false;
 
   private http: HttpClient;
 
@@ -77,7 +82,7 @@ export class DetalleCiudadComponent implements OnInit {
     }
   }
 
-  resolverDestino() {
+resolverDestino() {
     this.destinoService.getOrCreateByName({
       nombre: this.city.nombre,
       pais: this.city.pais,
@@ -85,9 +90,12 @@ export class DetalleCiudadComponent implements OnInit {
     }).subscribe({
       next: (destino) => {
         this.resolvedDestinationId = destino.id;
+        this.city.poblacion = destino.poblacion || this.city.poblacion;
         this.cargarReviews(destino.id);
         if (this.isLoggedIn) {
           this.cargarMiExperiencia(destino.id);
+          this.cargarMiPreferencia(destino.id);
+          this.cargarStats(destino.id);
         }
       },
       error: (err) => console.error('Error al resolver destino:', err)
@@ -95,21 +103,30 @@ export class DetalleCiudadComponent implements OnInit {
   }
 
   cargarMiExperiencia(destinationId: string) {
-    this.experienceService.getByDestination(destinationId).subscribe({
-      next: (data) => { this.myExperience = data ?? undefined; },
-      error: () => { this.myExperience = undefined; }
+    this.experienceService.getMyExperiencesByDestination(destinationId).subscribe({
+      next: (data) => { 
+        this.myExperiencesList = data || []; 
+        // Dejamos la primera como referencia si hace falta
+        this.myExperience = this.myExperiencesList.length > 0 ? this.myExperiencesList[0] : undefined;
+      },
+      error: () => { this.myExperiencesList = []; this.myExperience = undefined; }
     });
   }
 
-  cargarReviews(destinationId: string) {
+  cargarMiPreferencia(destinationId: string) {
+    this.experienceService.getUserPreference(destinationId).subscribe({
+      next: (data) => { this.myPreference = data ?? undefined; },
+      error: () => { this.myPreference = undefined; }
+    });
+  }
+
+cargarReviews(destinationId: string) {
     this.experienceService.getReviewsByDestination(destinationId).subscribe({
       next: (data) => {
-        this.allReviews = data;
-        this.totalReviews = data.length;
-        if (data.length > 0) {
-          const suma = data.reduce((acc, r) => acc + r.rating, 0);
-          this.ratingPromedio = Math.round((suma / data.length) * 10) / 10;
-        }
+        // FILTRO NUEVO: Nos quedamos SOLO con las experiencias que tienen texto
+        const reviewsConTexto = data.filter(r => r.review && r.review.trim() !== '');
+        
+        this.allReviews = reviewsConTexto;
         this.aplicarFiltros();
       },
       error: () => {
@@ -206,7 +223,7 @@ export class DetalleCiudadComponent implements OnInit {
     this.showConfirmModal = true;
   }
 
-  confirmarEliminarReview() {
+confirmarEliminarReview() {
     if (!this.reviewToDelete) return;
     this.experienceService.delete(this.reviewToDelete.id).subscribe({
       next: () => {
@@ -215,6 +232,12 @@ export class DetalleCiudadComponent implements OnInit {
         if (this.resolvedDestinationId) {
           this.cargarReviews(this.resolvedDestinationId);
           this.cargarMiExperiencia(this.resolvedDestinationId);
+          this.cargarStats(this.resolvedDestinationId);
+          
+          // Si nos quedamos sin experiencias, cerramos el modal de la lista
+          if (this.myExperiencesList.length <= 1) {
+            this.showSelectExperienceModal = false;
+          }
         }
       }
     });
@@ -231,6 +254,8 @@ export class DetalleCiudadComponent implements OnInit {
     if (this.resolvedDestinationId) {
       this.cargarReviews(this.resolvedDestinationId);
       this.cargarMiExperiencia(this.resolvedDestinationId);
+      this.cargarMiPreferencia(this.resolvedDestinationId); // <-- Esto actualiza el panel solo
+      this.cargarStats(this.resolvedDestinationId);         // <-- Esto actualiza el número grande arriba
     }
   }
 
@@ -238,40 +263,6 @@ export class DetalleCiudadComponent implements OnInit {
     this.showExperienceModal = false;
   }
 
-  cambiarRating(newRating: number) {
-    if (!this.myExperience) return;
-    const dto = {
-      destinationId: this.myExperience.destinationId,
-      review: this.myExperience.review,
-      rating: newRating,
-      isFavorite: this.myExperience.isFavorite,
-      isRepeatVisit: this.myExperience.isRepeatVisit,
-      startDate: this.myExperience.startDate,
-      endDate: this.myExperience.endDate,
-    };
-    this.experienceService.update(this.myExperience.id, dto).subscribe({
-      next: (updated) => {
-        this.myExperience = updated;
-        this.cargarReviews(this.resolvedDestinationId!);
-      }
-    });
-  }
-
-  toggleFavorito() {
-    if (!this.myExperience) return;
-    const dto = {
-      destinationId: this.myExperience.destinationId,
-      review: this.myExperience.review,
-      rating: this.myExperience.rating,
-      isFavorite: !this.myExperience.isFavorite,
-      isRepeatVisit: this.myExperience.isRepeatVisit,
-      startDate: this.myExperience.startDate,
-      endDate: this.myExperience.endDate,
-    };
-    this.experienceService.update(this.myExperience.id, dto).subscribe({
-      next: (updated) => { this.myExperience = updated; }
-    });
-  }
 
   getStarsArray(max: number = 5) {
     return Array(max).fill(0).map((_, i) => i + 1);
@@ -317,6 +308,16 @@ export class DetalleCiudadComponent implements OnInit {
       : this.textoCompleto.substring(0, 400) + '...';
   }
 
+  cargarStats(destinationId: string) {
+    this.experienceService.getDestinationStats(destinationId).subscribe({
+      next: (stats) => {
+        this.ratingPromedio = stats.averageRating;
+        this.totalVisitas = stats.totalVisits; // <-- Nuevo contador exacto
+      }
+    });
+  }
+
+
   getStars(rating: number) {
     return Array(5).fill(0).map((_, i) => i < Math.round(rating));
   }
@@ -324,5 +325,120 @@ export class DetalleCiudadComponent implements OnInit {
   get bookingUrl(): string {
     const query = encodeURIComponent(`${this.city?.nombre ?? ''} ${this.city?.pais ?? ''}`);
     return `https://www.booking.com/search.html?ss=${query}`;
+  }
+
+// NUEVO: Método exclusivo para el ojito
+toggleVisitado() {
+    if (!this.resolvedDestinationId) return;
+
+    // Si intenta desmarcar y tiene experiencias, mostramos el nuevo modal
+    if (this.myPreference?.isVisited && this.myExperiencesList.length > 0) {
+      this.showCannotUnvisitAlert = true;
+      return; 
+    }
+
+    const dto = {
+      rating: this.myPreference?.rating || 0,
+      isFavorite: this.myPreference?.isFavorite || false,
+      isWishlist: this.myPreference?.isWishlist || false,
+      isVisited: !(this.myPreference?.isVisited || false)
+    };
+    this.experienceService.updateUserPreference(this.resolvedDestinationId, dto).subscribe({
+      next: (updated) => { 
+        this.myPreference = updated;
+        this.cargarStats(this.resolvedDestinationId!); 
+      }
+    });
+  }
+
+  // ACTUALIZADO: Cambiar rating automáticamente marca como visitado
+  cambiarRating(newRating: number) {
+    if (!this.resolvedDestinationId) return;
+    const dto = {
+      rating: newRating,
+      isFavorite: this.myPreference?.isFavorite || false,
+      isWishlist: false, 
+      isVisited: true // <-- Automáticamente en true al puntuar
+    };
+    this.experienceService.updateUserPreference(this.resolvedDestinationId, dto).subscribe({
+      next: (updated) => { 
+        this.myPreference = updated; 
+        this.cargarStats(this.resolvedDestinationId!);
+      }
+    });
+  }
+
+  // ACTUALIZADO: La X de borrar (Mantiene el visitado y el corazón)
+  clearRating() {
+    if (!this.resolvedDestinationId) return;
+    const dto = {
+      rating: 0, // Solo borramos esto
+      isFavorite: this.myPreference?.isFavorite || false,
+      isWishlist: this.myPreference?.isWishlist || false,
+      isVisited: this.myPreference?.isVisited || false // <-- Se mantiene intacto
+    };
+    this.experienceService.updateUserPreference(this.resolvedDestinationId, dto).subscribe({
+      next: (updated) => { 
+        this.myPreference = updated; 
+        this.cargarStats(this.resolvedDestinationId!); 
+      }
+    });
+  }
+
+  // ACTUALIZADOS: Favorito y Wishlist manteniendo el resto intacto
+  toggleFavorito() {
+    if (!this.resolvedDestinationId) return;
+    const dto = {
+      rating: this.myPreference?.rating || 0,
+      isFavorite: !(this.myPreference?.isFavorite || false),
+      isWishlist: this.myPreference?.isWishlist || false,
+      isVisited: this.myPreference?.isVisited || false
+    };
+    this.experienceService.updateUserPreference(this.resolvedDestinationId, dto).subscribe({
+      next: (updated) => { this.myPreference = updated; }
+    });
+  }
+
+toggleWishlist() {
+    if (!this.resolvedDestinationId) return;
+    const dto = {
+      rating: this.myPreference?.rating || 0,
+      isFavorite: this.myPreference?.isFavorite || false,
+      isWishlist: !(this.myPreference?.isWishlist || false),
+      isVisited: this.myPreference?.isVisited || false // SE MANTIENE
+    };
+    this.experienceService.updateUserPreference(this.resolvedDestinationId, dto).subscribe({
+      next: (updated) => { this.myPreference = updated; }
+    });
+  }
+
+cerrarAlertaUnvisit() {
+    this.showCannotUnvisitAlert = false;
+  }
+
+  // Ahora siempre abre la lista, sin importar si hay 1 o muchas
+  openMyExperiencesModal() {
+    this.showSelectExperienceModal = true;
+  }
+
+  seleccionarExperienciaParaEditar(exp: TravelExperienceDto) {
+    this.currentExperience = exp;
+    this.showSelectExperienceModal = false;
+    this.showExperienceModal = true; 
+  }
+
+  cerrarSelectExperienceModal() {
+    this.showSelectExperienceModal = false;
+  }
+
+
+  // Calcula la cantidad de días del viaje (ej: del 4 al 7 son 4 días inclusivos)
+  calcularDiasViaje(start: string | Date, end: string | Date | undefined): number {
+    if (!start || !end) return 1;
+    const f1 = new Date(start);
+    const f2 = new Date(end);
+    const diffTime = Math.abs(f2.getTime() - f1.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+    return diffDays;
   }
 }
