@@ -1,101 +1,146 @@
-<div class="settings-container py-5">
-  <div class="container">
-    <div class="settings-box shadow">
-      
-      <div class="d-flex justify-content-start mb-3">
-        <a [routerLink]="['/perfil', currentUserInfo?.userName]" class="btn btn-dark text-white rounded-pill px-4 shadow-sm">
-          <i class="fa fa-arrow-left me-2"></i> Volver
-        </a>
+<div style="min-height: 100vh; background-color: #14181c;" class="text-white py-5">
+  <div class="container" style="max-width: 780px;">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+        <i class="fa fa-paper-plane" style="color: #00c030; font-size: 1.2rem;"></i>
+        <span style="font-size: 0.85rem; letter-spacing: 3px; color: #9ab; text-transform: uppercase;">WishTrip</span>
+      </div>
+      <h2 style="font-weight: 800; letter-spacing: 0.1em; font-size: 2rem;">Configuración</h2>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="d-flex border-bottom border-secondary mb-5">
+      <button class="settings-tab" [class.settings-tab-active]="activeTab === 'social'" (click)="setTab('social')">
+        <i class="fa fa-user me-2"></i> Perfil
+      </button>
+      <button class="settings-tab" [class.settings-tab-active]="activeTab === 'seguridad'" (click)="setTab('seguridad')">
+        <i class="fa fa-lock me-2"></i> Seguridad
+      </button>
+    </div>
+
+    <!-- TAB: PERFIL -->
+    <div *ngIf="activeTab === 'social'">
+
+      <div class="alert-wishtrip success mb-4" *ngIf="mensajeSocial">
+        <i class="fa fa-check-circle me-2"></i>{{ mensajeSocial }}
       </div>
 
-      <h2 class="title-header text-center">SETTINGS</h2>
-      
-      <div class="tabs-header">
-        <button class="tab-btn" [class.active]="activeTab === 'social'" (click)="setTab('social')">profile/social</button>
-        <button class="tab-btn" [class.active]="activeTab === 'seguridad'" (click)="setTab('seguridad')">seguridad</button>
-      </div>
-
-      <div class="tab-content py-4" *ngIf="activeTab === 'social'">
-        <div class="alert alert-success" *ngIf="mensajeSocial">{{ mensajeSocial }}</div>
-        
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label text-dark">Nombre de usuario</label>
-            <input type="text" class="form-control" [(ngModel)]="editData.userName">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label text-dark">Nombre completo</label>
-            <input type="text" class="form-control" [(ngModel)]="editData.name">
-          </div>
-          
-          <div class="col-md-12 mb-3">
-            <label class="form-label text-dark">Foto de Perfil (Avatar)</label>
-            <div class="d-flex align-items-center gap-3">
-                <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" #fileInput>
-                <button *ngIf="editData.avatarUrl" type="button" class="btn btn-outline-secondary btn-sm" (click)="removeAvatar()">
-                    <i class="fa fa-times me-1"></i> Quitar
-                </button>
+      <!-- Avatar -->
+      <div class="settings-section mb-4">
+        <div class="d-flex align-items-center gap-4">
+          <img [src]="editData.avatarUrl || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + editData.userName"
+               class="rounded-circle"
+               style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #3d4b5c;">
+          <div class="flex-grow-1">
+            <label class="settings-label mb-2">Foto de Perfil</label>
+            <div class="d-flex gap-2 align-items-center">
+              <input type="file" class="form-control settings-input" accept="image/*"
+                     (change)="onFileSelected($event)" #fileInput>
+              <button *ngIf="editData.avatarUrl" class="btn-settings-danger" (click)="removeAvatar()">
+                <i class="fa fa-times"></i>
+              </button>
             </div>
-
-            <div class="mt-3 d-flex align-items-center gap-3">
-                <div>
-                    <p class="text-muted mb-1" style="font-size: 0.85rem;">Vista previa:</p>
-                    <img [src]="editData.avatarUrl || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + editData.userName" 
-                         alt="Avatar Preview" 
-                         class="rounded-circle shadow-sm border" 
-                         style="width: 80px; height: 80px; object-fit: cover; background-color: #f8f9fa;">
-                </div>
-                <div *ngIf="!editData.avatarUrl" class="text-muted" style="font-size: 0.8rem; max-width: 250px;">
-                    Se usará tu avatar estilo <b>Pixel Art</b> predeterminado.
-                </div>
-            </div>
+            <small class="text-white-50 mt-1 d-block" *ngIf="!editData.avatarUrl">
+              Sin foto se usará tu avatar Pixel Art predeterminado.
+            </small>
           </div>
-
-          <div class="col-md-12 mb-4 mt-2">
-            <label class="form-label text-dark">Biografía</label>
-            <textarea class="form-control" rows="4" [(ngModel)]="editData.bio"></textarea>
-          </div>
-        </div>
-        
-        <div class="d-flex align-items-center gap-3">
-          <button class="btn btn-primary px-4" (click)="saveSocial()">Guardar cambios</button>
-          <button class="btn btn-danger px-4 fw-bold" (click)="logout()">Salir</button>
         </div>
       </div>
 
-      <div class="tab-content py-4" *ngIf="activeTab === 'seguridad'">
-        <div class="alert alert-info" *ngIf="mensajeSeguridad || mensajeEmail">{{ mensajeSeguridad || mensajeEmail }}</div>
-        
-        <h5 class="text-dark mb-3 border-bottom pb-2">Actualizar Correo Electrónico</h5>
-        <div class="row align-items-end mb-5">
-            <div class="col-md-8 mb-3 mb-md-0">
-                <input type="email" class="form-control" [(ngModel)]="editData.email">
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary w-100" (click)="saveEmail()">Actualizar correo</button>
-            </div>
-        </div>
+      <div class="settings-divider"></div>
 
-        <h5 class="text-dark mb-3 border-bottom pb-2">Cambiar Contraseña</h5>
+      <!-- Datos personales -->
+      <div class="settings-section mb-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="settings-label">Nombre de usuario</label>
+            <input type="text" class="form-control settings-input" [(ngModel)]="editData.userName">
+          </div>
+          <div class="col-md-6">
+            <label class="settings-label">Nombre completo</label>
+            <input type="text" class="form-control settings-input" [(ngModel)]="editData.name">
+          </div>
+          <div class="col-12">
+            <label class="settings-label">Biografía</label>
+            <textarea class="form-control settings-input" rows="4" [(ngModel)]="editData.bio"
+                      placeholder="Contá algo sobre vos..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mt-2">
+        <button class="btn-settings-primary" (click)="saveSocial()">
+          <i class="fa fa-save me-2"></i> Guardar cambios
+        </button>
+        <button class="btn-settings-danger" (click)="logout()">
+          <i class="fa fa-sign-out me-2"></i> Cerrar sesión
+        </button>
+      </div>
+
+    </div>
+
+    <!-- TAB: SEGURIDAD -->
+    <div *ngIf="activeTab === 'seguridad'">
+
+      <div class="alert-wishtrip info mb-4" *ngIf="mensajeSeguridad || mensajeEmail">
+        <i class="fa fa-info-circle me-2"></i>{{ mensajeSeguridad || mensajeEmail }}
+      </div>
+
+      <!-- Email -->
+      <div class="settings-section mb-4">
+        <label class="settings-section-title mb-3">
+          <i class="fa fa-envelope me-2" style="color: #00c030;"></i> Correo Electrónico
+        </label>
+        <div class="d-flex gap-3">
+          <input type="email" class="form-control settings-input flex-grow-1" [(ngModel)]="editData.email">
+          <button class="btn-settings-primary" (click)="saveEmail()">Actualizar</button>
+        </div>
+      </div>
+
+      <div class="settings-divider"></div>
+
+      <!-- Contraseña -->
+      <div class="settings-section mb-4">
+        <label class="settings-section-title mb-3">
+          <i class="fa fa-key me-2" style="color: #00c030;"></i> Cambiar Contraseña
+        </label>
         <div class="mb-3">
-          <label class="form-label text-dark">Contraseña Actual</label>
-          <input type="password" class="form-control" [(ngModel)]="passData.currentPassword">
+          <label class="settings-label">Contraseña actual</label>
+          <input type="password" class="form-control settings-input" [(ngModel)]="passData.currentPassword">
         </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <input type="password" class="form-control" [(ngModel)]="passData.newPassword" placeholder="Nueva Contraseña">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="settings-label">Nueva contraseña</label>
+            <input type="password" class="form-control settings-input" [(ngModel)]="passData.newPassword">
           </div>
-          <div class="col-md-6 mb-4">
-            <input type="password" class="form-control" [(ngModel)]="passData.confirmPassword" placeholder="Confirmar Contraseña">
+          <div class="col-md-6">
+            <label class="settings-label">Confirmar contraseña</label>
+            <input type="password" class="form-control settings-input" [(ngModel)]="passData.confirmPassword">
           </div>
         </div>
-        <button class="btn btn-primary px-4" (click)="changePassword()">Actualizar contraseña</button>
-
-        <div class="danger-zone mt-5 p-4 border border-danger rounded">
-            <h5 class="text-danger mb-2">Zona de Peligro</h5>
-            <button class="btn btn-outline-danger" (click)="deleteAccount()"><i class="fa fa-trash"></i> Eliminar Cuenta</button>
-        </div>
+        <button class="btn-settings-primary" (click)="changePassword()">
+          <i class="fa fa-lock me-2"></i> Actualizar contraseña
+        </button>
       </div>
+
+      <div class="settings-divider"></div>
+
+      <!-- Zona de peligro -->
+      <div class="settings-section danger-zone mt-4 p-4 rounded"
+           style="border: 1px solid rgba(231,76,60,0.4); background: rgba(231,76,60,0.05);">
+        <label class="settings-section-title mb-3" style="color: #e74c3c;">
+          <i class="fa fa-exclamation-triangle me-2"></i> Zona de Peligro
+        </label>
+        <p class="text-white-50 mb-3" style="font-size: 0.88rem;">
+          Esta acción es irreversible. Se eliminarán todos tus datos permanentemente.
+        </p>
+        <button class="btn-settings-danger" (click)="deleteAccount()">
+          <i class="fa fa-trash me-2"></i> Eliminar mi cuenta
+        </button>
+      </div>
+
     </div>
   </div>
 </div>

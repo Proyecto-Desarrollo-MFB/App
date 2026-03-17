@@ -6,10 +6,10 @@ export interface ChangePasswordDto {
 
 export interface UpdateProfileDto {
   userName?: string;
+  email?: string;
   name?: string;
   bio?: string;
   avatarUrl?: string;
-  email?: string;
 }
 
 export interface UserProfileDto {

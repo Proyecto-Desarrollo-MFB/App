@@ -73,3 +73,31 @@
     }
   }
 }
+.tab-btn {
+  background: none;
+  border: none;
+  color: #9ab;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 12px 28px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+
+  &:hover {
+    color: #fff;
+  }
+
+  &.tab-active {
+    color: #fff;
+    border-bottom: 3px solid #00c030;
+  }
+}
+
+.user-result-card {
+  transition: background 0.15s;
+  &:hover {
+    background: #252d36 !important;
+  }
+}

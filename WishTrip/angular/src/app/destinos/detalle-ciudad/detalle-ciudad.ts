@@ -1,81 +1,304 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { Router, RouterLink } from '@angular/router'; // <-- AGREGAMOS RouterLink
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpBackend } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { ConfigStateService } from '@abp/ng.core';
+import { LogExperienceModalComponent } from '../../log-experience-modal/log-experience-modal.component';
+import { TravelExperienceDto } from '../../proxy/travel-experiences/models';
+import { DestinoService } from '../../proxy/destinos/destino.service';
+import { TravelExperienceService } from '../../proxy/travel-experiences/travel-experience.service';
 
 @Component({
   selector: 'app-detalle-ciudad',
   standalone: true,
-  imports: [CommonModule, RouterLink], // <-- LO SUMAMOS A LOS IMPORTS
-  // CORREGIDO: Nombres de archivo sin .component
+  imports: [CommonModule, RouterLink, LogExperienceModalComponent, FormsModule],
   templateUrl: './detalle-ciudad.html',
   styleUrls: ['./detalle-ciudad.scss']
 })
 export class DetalleCiudadComponent implements OnInit {
-  
+
   city: any;
-  
-  // Variables para manejar el texto largo
+
   descripcion: string = 'Buscando información...';
   textoCompleto: string = '';
   mostrarTodo: boolean = false;
   tieneTextoLargo: boolean = false;
-  
-  ratingPromedio: number = 4.5;
-  totalReviews: number = 1254;
-  
-  reviews = [
-    { usuario: 'Sofia_Travels', avatar: 'https://i.pravatar.cc/150?u=1', rating: 5, texto: '¡Increíble lugar! La comida es espectacular y la gente muy amable.', fecha: 'Hace 2 días' },
-    { usuario: 'MarcosG', avatar: 'https://i.pravatar.cc/150?u=2', rating: 4, texto: 'Muy lindo paisaje, aunque un poco caro en temporada alta.', fecha: 'Hace 1 semana' },
-    { usuario: 'Ana_R', avatar: 'https://i.pravatar.cc/150?u=3', rating: 5, texto: 'Volvería mil veces. Es mágico.', fecha: 'Hace 2 semanas' }
-  ];
+
+  ratingPromedio: number = 0;
+  totalReviews: number = 0;
+
+  showExperienceModal = false;
+  currentExperience?: TravelExperienceDto;
+  resolvedDestinationId?: string;
+
+  myExperience?: TravelExperienceDto;
+  isLoggedIn = false;
+  currentUserName = '';
+
+  allReviews: any[] = [];
+  reviews: any[] = [];
+
+  searchKeyword: string = '';
+  keywords: string[] = [];
+  filtroSentimiento: 'todos' | 'positivo' | 'neutral' | 'negativo' = 'todos';
+
+  showConfirmModal = false;
+  reviewToDelete: any = null;
 
   private http: HttpClient;
 
-  constructor(private router: Router, private location: Location, handler: HttpBackend) {
+  constructor(
+    public router: Router,
+    private location: Location,
+    private destinoService: DestinoService,
+    private experienceService: TravelExperienceService,
+    private configState: ConfigStateService,
+    handler: HttpBackend
+  ) {
     this.http = new HttpClient(handler);
-    
+
     const nav = this.router.getCurrentNavigation();
     if (nav?.extras?.state?.['data']) {
       this.city = nav.extras.state['data'];
     } else {
-      this.router.navigate(['/']); 
+      this.router.navigate(['/']);
     }
   }
 
   ngOnInit() {
+    const currentUser = this.configState.getOne('currentUser');
+    this.isLoggedIn = !!currentUser?.id;
+    this.currentUserName = currentUser?.userName || '';
+
     if (this.city) {
       this.obtenerDescripcionWikipedia(this.city.nombre);
+      this.resolverDestino();
     }
+  }
+
+  resolverDestino() {
+    this.destinoService.getOrCreateByName({
+      nombre: this.city.nombre,
+      pais: this.city.pais,
+      poblacion: this.city.poblacion || 0
+    }).subscribe({
+      next: (destino) => {
+        this.resolvedDestinationId = destino.id;
+        this.cargarReviews(destino.id);
+        if (this.isLoggedIn) {
+          this.cargarMiExperiencia(destino.id);
+        }
+      },
+      error: (err) => console.error('Error al resolver destino:', err)
+    });
+  }
+
+  cargarMiExperiencia(destinationId: string) {
+    this.experienceService.getByDestination(destinationId).subscribe({
+      next: (data) => { this.myExperience = data ?? undefined; },
+      error: () => { this.myExperience = undefined; }
+    });
+  }
+
+  cargarReviews(destinationId: string) {
+    this.experienceService.getReviewsByDestination(destinationId).subscribe({
+      next: (data) => {
+        this.allReviews = data;
+        this.totalReviews = data.length;
+        if (data.length > 0) {
+          const suma = data.reduce((acc, r) => acc + r.rating, 0);
+          this.ratingPromedio = Math.round((suma / data.length) * 10) / 10;
+        }
+        this.aplicarFiltros();
+      },
+      error: () => {
+        this.allReviews = [];
+        this.reviews = [];
+      }
+    });
+  }
+
+  aplicarFiltros() {
+    let resultado = [...this.allReviews];
+
+    if (this.filtroSentimiento === 'positivo') {
+      resultado = resultado.filter(r => r.rating >= 3.5);
+    } else if (this.filtroSentimiento === 'negativo') {
+      resultado = resultado.filter(r => r.rating <= 2.5);
+    } else if (this.filtroSentimiento === 'neutral') {
+      resultado = resultado.filter(r => r.rating > 2.5 && r.rating < 3.5);
+    }
+
+    if (this.keywords.length > 0) {
+      resultado = resultado.filter(r =>
+        r.review && this.keywords.every(kw =>
+          r.review.toLowerCase().includes(kw.toLowerCase())
+        )
+      );
+    }
+
+    this.reviews = resultado;
+  }
+
+  setFiltro(filtro: 'todos' | 'positivo' | 'neutral' | 'negativo') {
+    this.filtroSentimiento = filtro;
+    this.aplicarFiltros();
+  }
+
+  agregarKeyword() {
+    const kw = this.searchKeyword.trim();
+    if (kw && !this.keywords.includes(kw.toLowerCase())) {
+      this.keywords.push(kw.toLowerCase());
+      this.searchKeyword = '';
+      this.aplicarFiltros();
+    }
+  }
+
+  eliminarKeyword(kw: string) {
+    this.keywords = this.keywords.filter(k => k !== kw);
+    this.aplicarFiltros();
+  }
+
+  limpiarKeywords() {
+    this.keywords = [];
+    this.searchKeyword = '';
+    this.aplicarFiltros();
+  }
+
+  resaltarTexto(texto: string): string {
+    if (!texto || this.keywords.length === 0) return texto;
+    let result = texto;
+    this.keywords.forEach(kw => {
+      const regex = new RegExp(`(${kw})`, 'gi');
+      result = result.replace(regex, '<mark>$1</mark>');
+    });
+    return result;
+  }
+
+  openExperienceModal() {
+    if (!this.resolvedDestinationId) return;
+    this.currentExperience = this.myExperience;
+    this.showExperienceModal = true;
+  }
+
+  openNewExperienceModal() {
+    if (!this.resolvedDestinationId) return;
+    this.currentExperience = undefined;
+    this.showExperienceModal = true;
+  }
+
+  editarReview(review: any) {
+    this.currentExperience = {
+      id: review.id,
+      destinationId: this.resolvedDestinationId,
+      review: review.review,
+      rating: review.rating,
+      isFavorite: review.isFavorite,
+      startDate: review.startDate,
+      endDate: review.endDate,
+    } as TravelExperienceDto;
+    this.showExperienceModal = true;
+  }
+
+  eliminarReview(review: any) {
+    this.reviewToDelete = review;
+    this.showConfirmModal = true;
+  }
+
+  confirmarEliminarReview() {
+    if (!this.reviewToDelete) return;
+    this.experienceService.delete(this.reviewToDelete.id).subscribe({
+      next: () => {
+        this.showConfirmModal = false;
+        this.reviewToDelete = null;
+        if (this.resolvedDestinationId) {
+          this.cargarReviews(this.resolvedDestinationId);
+          this.cargarMiExperiencia(this.resolvedDestinationId);
+        }
+      }
+    });
+  }
+
+  cancelarEliminarReview() {
+    this.showConfirmModal = false;
+    this.reviewToDelete = null;
+  }
+
+  onExperienceSaved(exp: TravelExperienceDto) {
+    this.myExperience = exp;
+    this.showExperienceModal = false;
+    if (this.resolvedDestinationId) {
+      this.cargarReviews(this.resolvedDestinationId);
+      this.cargarMiExperiencia(this.resolvedDestinationId);
+    }
+  }
+
+  onModalClosed() {
+    this.showExperienceModal = false;
+  }
+
+  cambiarRating(newRating: number) {
+    if (!this.myExperience) return;
+    const dto = {
+      destinationId: this.myExperience.destinationId,
+      review: this.myExperience.review,
+      rating: newRating,
+      isFavorite: this.myExperience.isFavorite,
+      isRepeatVisit: this.myExperience.isRepeatVisit,
+      startDate: this.myExperience.startDate,
+      endDate: this.myExperience.endDate,
+    };
+    this.experienceService.update(this.myExperience.id, dto).subscribe({
+      next: (updated) => {
+        this.myExperience = updated;
+        this.cargarReviews(this.resolvedDestinationId!);
+      }
+    });
+  }
+
+  toggleFavorito() {
+    if (!this.myExperience) return;
+    const dto = {
+      destinationId: this.myExperience.destinationId,
+      review: this.myExperience.review,
+      rating: this.myExperience.rating,
+      isFavorite: !this.myExperience.isFavorite,
+      isRepeatVisit: this.myExperience.isRepeatVisit,
+      startDate: this.myExperience.startDate,
+      endDate: this.myExperience.endDate,
+    };
+    this.experienceService.update(this.myExperience.id, dto).subscribe({
+      next: (updated) => { this.myExperience = updated; }
+    });
+  }
+
+  getStarsArray(max: number = 5) {
+    return Array(max).fill(0).map((_, i) => i + 1);
   }
 
   obtenerDescripcionWikipedia(nombre: string) {
     const url = `https://es.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&redirects=1&titles=${encodeURIComponent(nombre)}&format=json&origin=*`;
-
     this.http.get(url).subscribe({
       next: (res: any) => {
         try {
           const pages = res.query.pages;
           const pageId = Object.keys(pages)[0];
-
           if (pageId !== '-1' && pages[pageId].extract) {
-            // Guardamos el texto completo original
             this.textoCompleto = pages[pageId].extract;
-            
-            // Verificamos si es largo (más de 400 caracteres)
             if (this.textoCompleto.length > 400) {
-                this.tieneTextoLargo = true;
-                this.descripcion = this.textoCompleto.substring(0, 400) + '...';
+              this.tieneTextoLargo = true;
+              this.descripcion = this.textoCompleto.substring(0, 400) + '...';
             } else {
-                this.tieneTextoLargo = false;
-                this.descripcion = this.textoCompleto;
+              this.tieneTextoLargo = false;
+              this.descripcion = this.textoCompleto;
             }
           } else {
-             if (nombre === this.city.nombre) {
-                 this.obtenerDescripcionWikipedia(`${this.city.nombre}, ${this.city.pais}`);
-             } else {
-                 this.descripcion = "No se encontró una descripción detallada para este destino.";
-             }
+            if (nombre === this.city.nombre) {
+              this.obtenerDescripcionWikipedia(`${this.city.nombre}, ${this.city.pais}`);
+            } else {
+              this.descripcion = "No se encontró una descripción detallada para este destino.";
+            }
           }
         } catch (e) {
           this.descripcion = "Información no disponible.";
@@ -87,17 +310,19 @@ export class DetalleCiudadComponent implements OnInit {
     });
   }
 
-  // Función del botón Ver más
   toggleDescripcion() {
     this.mostrarTodo = !this.mostrarTodo;
-    if (this.mostrarTodo) {
-        this.descripcion = this.textoCompleto;
-    } else {
-        this.descripcion = this.textoCompleto.substring(0, 400) + '...';
-    }
+    this.descripcion = this.mostrarTodo
+      ? this.textoCompleto
+      : this.textoCompleto.substring(0, 400) + '...';
   }
 
   getStars(rating: number) {
     return Array(5).fill(0).map((_, i) => i < Math.round(rating));
+  }
+
+  get bookingUrl(): string {
+    const query = encodeURIComponent(`${this.city?.nombre ?? ''} ${this.city?.pais ?? ''}`);
+    return `https://www.booking.com/search.html?ss=${query}`;
   }
 }

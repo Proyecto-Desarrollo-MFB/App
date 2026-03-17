@@ -1,0 +1,79 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <span class="modal-title">{{ existingExperience ? 'Editar experiencia...' : 'Registrar experiencia...' }}</span>
+      <button class="close-btn" (click)="close()">✕</button>
+    </div>
+
+    <hr />
+
+    <div class="modal-body">
+
+      <!-- Toggle primera vez / repetida -->
+      <div class="repeat-toggle d-flex align-items-center gap-3 mb-2">
+        <input type="checkbox"
+               id="repeatVisit"
+               [(ngModel)]="form.isRepeatVisit"
+               class="form-check-input"
+               style="width: 18px; height: 18px; cursor: pointer;">
+        <label for="repeatVisit" style="cursor: pointer; color: #ccc; font-size: 0.95rem;">
+          Ya visité este lugar antes
+        </label>
+      </div>
+
+      <!-- Fechas -->
+      <div class="dates-row">
+        <div class="field">
+          <label>Fecha de llegada</label>
+          <input type="date" [(ngModel)]="form.startDate" [max]="form.endDate || null" />
+        </div>
+        <div class="field">
+          <label>Fecha de salida</label>
+          <!-- Fecha de salida — agregá [min]: -->
+            <input type="date" [(ngModel)]="form.endDate" [min]="form.startDate" />
+        </div>
+      </div>
+
+      <!-- Review -->
+      <div class="field">
+        <textarea
+          [(ngModel)]="form.review"
+          placeholder="Añadí una reseña..."
+          rows="4">
+        </textarea>
+      </div>
+
+      <!-- Rating y Favorito -->
+      <div class="rating-row">
+        <div class="rating-section">
+          <span class="label">Puntuación</span>
+          <div class="stars">
+            <span *ngFor="let star of stars"
+                  class="star"
+                  [class.filled]="star <= form.rating"
+                  (click)="setRating(star)">★</span>
+          </div>
+          <span class="rating-value">{{ form.rating }} de 5</span>
+        </div>
+
+        <div class="fav-section">
+          <span class="label">Favorito</span>
+          <button class="heart-btn"
+                  [class.liked]="form.isFavorite"
+                  (click)="toggleFavorite()">♥</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="save-btn"
+              (click)="save()"
+              [disabled]="isSaving || form.rating === 0">
+        {{ isSaving ? 'GUARDANDO...' : 'GUARDAR' }}
+      </button>
+    </div>
+
+  </div>
+</div>
