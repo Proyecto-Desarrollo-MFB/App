@@ -48,3 +48,9 @@ export interface DestinoDto extends AuditedEntityDto<string> {
   pais: string;
   poblacion: string;
 }
+
+export interface GetOrCreateDestinoDto {
+  nombre?: string;
+  pais?: string;
+  poblacion: number;
+}

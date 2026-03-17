@@ -1,0 +1,56 @@
+<nav class="wishtrip-navbar">
+  <div class="navbar-inner">
+
+    <!-- Logo / Nombre app -->
+    <a class="navbar-brand" routerLink="/">
+      <i class="fa fa-paper-plane me-2"></i>
+      <span>WishTrip</span>
+    </a>
+
+    <!-- Derecha -->
+    <div class="navbar-right">
+
+      <!-- Botón buscar -->
+      <button class="nav-icon-btn" title="Buscar destinos" routerLink="/buscar-ciudades">
+        <i class="fa fa-search"></i>
+      </button>
+
+      <!-- Usuario logueado -->
+      <div *ngIf="hasLoggedIn" class="user-menu-wrapper" (mouseleave)="closeUserMenu()">
+        <button class="nav-username" (mouseenter)="showUserMenu = true" (click)="toggleUserMenu()">
+          <img [src]="avatarUrl"
+               class="rounded-circle me-2"
+               style="width: 28px; height: 28px; object-fit: cover; border: 1px solid #3d4b5c;">
+          {{ currentUserName }}
+          <i class="fa fa-caret-down ms-1"></i>
+        </button>
+
+        <div class="user-dropdown" *ngIf="showUserMenu">
+  <button class="dropdown-item-btn" (click)="goTo('/')">
+    <i class="fa fa-home me-2"></i> Inicio
+  </button>
+  <button class="dropdown-item-btn" (click)="goTo('/perfil/' + currentUserName)">
+    <i class="fa fa-user me-2"></i> Mi Perfil
+  </button>
+  <button class="dropdown-item-btn" (click)="goTo('/perfil/' + currentUserName)">
+    <i class="fa fa-star me-2"></i> Mis Reviews
+  </button>
+  <div class="dropdown-divider" style="border-top: 1px solid #3d4b5c; margin: 4px 0;"></div>
+  <button class="dropdown-item-btn" (click)="goTo('/settings')">
+    <i class="fa fa-cog me-2"></i> Configuración
+  </button>
+  <button class="dropdown-item-btn" (click)="goTo('/account/logout')">
+    <i class="fa fa-sign-out me-2" style="color: #e74c3c;"></i>
+    <span style="color: #e74c3c;">Cerrar sesión</span>
+  </button>
+</div>
+      </div>
+
+      <!-- No logueado -->
+      <a *ngIf="!hasLoggedIn" href="/account/login" class="nav-login-btn">
+        <i class="fa fa-sign-in me-1"></i> Ingresar
+      </a>
+
+    </div>
+  </div>
+</nav>

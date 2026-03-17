@@ -35,6 +35,15 @@ export class UserProfileService {
     { apiName: this.apiName,...config });
   
 
+  searchByUserName = (query: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, UserProfileDto[]>({
+      method: 'POST',
+      url: '/api/app/user-profile/search-by-user-name',
+      params: { query },
+    },
+    { apiName: this.apiName,...config });
+  
+
   updateProfile = (input: UpdateProfileDto, config?: Partial<Rest.Config>) =>
     this.restService.request<any, void>({
       method: 'PUT',

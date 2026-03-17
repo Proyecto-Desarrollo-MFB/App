@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 using WishTrip.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using WishTrip.EntityFrameworkCore;
 namespace WishTrip.Migrations
 {
     [DbContext(typeof(WishTripDbContext))]
-    partial class WishTripDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260308191126_Added_TravelExperience")]
+    partial class Added_TravelExperience
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1901,65 +1904,6 @@ namespace WishTrip.Migrations
                     b.ToTable("AppDestinos", (string)null);
                 });
 
-            modelBuilder.Entity("WishTrip.Destinos.UserDestinationPreference", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)")
-                        .HasColumnName("ConcurrencyStamp");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreationTime");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("CreatorId");
-
-                    b.Property<Guid>("DestinationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("ExtraProperties");
-
-                    b.Property<bool>("IsFavorite")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVisited")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsWishlist")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastModificationTime");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("LastModifierId");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId", "DestinationId")
-                        .IsUnique();
-
-                    b.ToTable("AppUserDestinationPreferences", (string)null);
-                });
-
             modelBuilder.Entity("WishTrip.TravelExperiences.TravelExperience", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2006,9 +1950,6 @@ namespace WishTrip.Migrations
                         .HasColumnName("IsDeleted");
 
                     b.Property<bool>("IsFavorite")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRepeatVisit")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModificationTime")

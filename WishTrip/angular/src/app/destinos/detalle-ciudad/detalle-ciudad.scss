@@ -113,3 +113,79 @@ $accent-blue: #40bcf4; // Nuevo color para el link
         background-color: lighten($accent-green, 10%);
     }
 }
+
+mark {
+  background-color: #ffd700;
+  color: #000;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+.activity-panel {
+  background: #2c3440;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.activity-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #384250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #9ab;
+  margin: 0 auto;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #4a5568;
+    color: #fff;
+  }
+
+  &.active-green {
+    color: #00c030;
+    background: rgba(0, 192, 48, 0.15);
+  }
+
+  &.active-orange {
+    color: #ff8c00;
+    background: rgba(255, 140, 0, 0.15);
+  }
+}
+
+.activity-action-btn {
+  background: none;
+  border: none;
+  color: #9ab;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: color 0.15s;
+
+  &:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.05);
+  }
+}
+
+.active-green {
+  color: #00c030 !important;
+  text-shadow: 0 0 8px rgba(0, 192, 48, 0.4); /* Opcional: le da un brillito premium */
+}
+
+.activity-icon {
+  transition: color 0.2s ease-in-out;
+}
+
+.activity-icon:hover {
+  color: #00c030;
+}
+
+mark {
+  background-color: #ffd700;
+  color: #000;
+  border-radius: 2px;
+  padding: 0 2px;
+}

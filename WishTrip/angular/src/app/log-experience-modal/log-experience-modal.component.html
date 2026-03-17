@@ -1,0 +1,161 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <span class="modal-title">{{ existingExperience ? 'Editar experiencia...' : 'Registrar experiencia...' }}</span>
+      <button class="close-btn" (click)="close()">✕</button>
+    </div>
+
+    <hr />
+
+    <div class="modal-body">
+
+      <div class="repeat-toggle d-flex align-items-center gap-3 mb-2">
+        <input type="checkbox"
+               id="repeatVisit"
+               [(ngModel)]="form.isRepeatVisit"
+               class="form-check-input"
+               style="width: 18px; height: 18px; cursor: pointer;">
+        <label for="repeatVisit" style="cursor: pointer; color: #ccc; font-size: 0.95rem;">
+          Ya visité este lugar antes
+        </label>
+      </div>
+
+      <div class="dates-wrapper mb-3" style="position: relative;">
+        <label class="d-block text-white-50 mb-1" style="font-size: 0.85rem;">Fechas del viaje</label>
+        
+        <div class="dates-display-btn d-flex align-items-center justify-content-between p-2 rounded" 
+             style="background: #1c1c1c; border: 1px solid #444; cursor: pointer;"
+             (click)="abrirCalendario()">
+          
+          <div class="d-flex w-100 gap-2">
+            <div class="flex-grow-1">
+              <small class="d-block text-muted" style="font-size: 0.7rem;">LLEGADA</small>
+              <span class="text-white">{{ form.startDate ? (selStart | date:'dd MMM yyyy') : 'Seleccionar' }}</span>
+            </div>
+            <div style="border-left: 1px solid #444; margin: 0 10px;"></div>
+            <div class="flex-grow-1">
+              <small class="d-block text-muted" style="font-size: 0.7rem;">SALIDA</small>
+              <span class="text-white">{{ form.endDate ? (selEnd | date:'dd MMM yyyy') : '--' }}</span>
+            </div>
+          </div>
+          
+          <i class="fa fa-calendar" style="color: #00c030; font-size: 1.2rem; margin-right: 5px;"></i>
+        </div>
+
+        <div *ngIf="showCalendar" class="calendar-popup p-3 rounded shadow-lg">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="cal-nav-btn" (click)="cambiarMes(-1)"><i class="fa fa-chevron-left"></i></button>
+
+            <div class="d-flex align-items-center gap-2 position-relative">
+              
+              <div style="position: relative;">
+                <span class="fw-bold text-white" style="cursor: pointer;" (click)="showMonthDropdown = !showMonthDropdown">
+                  {{ monthNames[calendarMonth.getMonth()] }} <i class="fa fa-caret-down ms-1" style="font-size: 0.7rem; color: #00c030;"></i>
+                </span>
+                
+                <div *ngIf="showMonthDropdown" class="month-dropdown shadow-lg">
+                  <div *ngFor="let m of monthNames; let i = index" 
+                       class="month-item" 
+                       [class.active-month]="i === calendarMonth.getMonth()"
+                       (click)="seleccionarMes(i)">
+                    {{ m }}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <span *ngIf="!isEditingYear" class="fw-bold text-white" style="cursor: pointer;" (click)="iniciarEdicionYear()">
+                  {{ calendarMonth.getFullYear() }} <i class="fa fa-pencil ms-1" style="font-size: 0.7rem; color: #9ab;"></i>
+                </span>
+                <input *ngIf="isEditingYear" 
+                       type="number"
+                       [(ngModel)]="inputYear"
+                       (blur)="guardarYear()"
+                       (keyup.enter)="guardarYear()"
+                       min="1900" max="2050"
+                       class="form-control form-control-sm bg-dark text-white border-success"
+                       style="width: 70px; padding: 0px 5px; font-size: 0.95rem; text-align: center; height: 24px;"
+                       autofocus>
+              </div>
+
+            </div>
+
+            <button class="cal-nav-btn" (click)="cambiarMes(1)"><i class="fa fa-chevron-right"></i></button>
+          </div>
+
+          <div class="cal-grid cal-header mb-1">
+            <div *ngFor="let day of weekDays" class="text-center text-white-50" style="font-size: 0.8rem;">{{ day }}</div>
+          </div>
+
+          <div class="cal-grid">
+            <div *ngFor="let day of calendarDays" 
+                 class="cal-day text-center rounded"
+                 [ngClass]="{
+                   'other-month': !day.isCurrentMonth,
+                   'selected-edge': esInicio(day.date) || esFin(day.date),
+                   'in-range': estaEnRango(day.date)
+                 }"
+                 (click)="seleccionarFecha(day.date)">
+              {{ day.date.getDate() }}
+            </div>
+          </div>
+          
+          <button class="btn btn-sm w-100 mt-3 text-white fw-bold" 
+                  style="background-color: #00c030;" 
+                  (click)="showCalendar = false">Listo</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <textarea
+          [(ngModel)]="form.review"
+          placeholder="Añadí una reseña..."
+          rows="4">
+        </textarea>
+      </div>
+
+      <div class="rating-row">
+        <div class="rating-section">
+          
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="label mb-0">Puntuación</span>
+            <i *ngIf="form.rating > 0" 
+               class="fa fa-times" 
+               style="color: #ff4d4d; cursor: pointer; font-size: 0.9rem; transition: transform 0.2s;"
+               onmouseover="this.style.transform='scale(1.2)'"
+               onmouseout="this.style.transform='scale(1)'"
+               (click)="clearRating()" 
+               title="Quitar puntuación"></i>
+          </div>
+
+          <div class="stars">
+            <span *ngFor="let star of stars"
+                  class="star"
+                  [class.filled]="star <= form.rating"
+                  (click)="setRating(star)">★</span>
+          </div>
+          
+          <span class="rating-value">{{ form.rating === 0 ? 'Sin calificar' : form.rating + ' de 5' }}</span>
+        </div>
+
+        <div class="fav-section">
+          <span class="label">Favorito</span>
+          <button class="heart-btn"
+                  [class.liked]="form.isFavorite"
+                  (click)="toggleFavorite()">♥</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="save-btn"
+              (click)="save()"
+              [disabled]="isSaving">
+        {{ isSaving ? 'GUARDANDO...' : 'GUARDAR' }}
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 
@@ -10,6 +11,7 @@ namespace WishTrip.Users
         Task UpdateProfileAsync(UpdateProfileDto input);
         Task ChangePasswordAsync(ChangePasswordDto input); // NUEVO
         Task DeleteMyAccountAsync();
+        Task<List<UserProfileDto>> SearchByUserNameAsync(string query);
     }
 
     public class UserProfileDto

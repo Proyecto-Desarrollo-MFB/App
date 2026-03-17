@@ -1,4 +1,4 @@
-import type { CitySearchRequestDto, CitySearchResultDto, CreateUpdateDestinoDto, DestinoDto } from './models';
+import type { CitySearchRequestDto, CitySearchResultDto, CreateUpdateDestinoDto, DestinoDto, GetOrCreateDestinoDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -40,6 +40,15 @@ export class DestinoService {
       method: 'GET',
       url: '/api/app/destino',
       params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount },
+    },
+    { apiName: this.apiName,...config });
+  
+
+  getOrCreateByName = (input: GetOrCreateDestinoDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, DestinoDto>({
+      method: 'GET',
+      url: '/api/app/destino/or-create-by-name',
+      params: { nombre: input.nombre, pais: input.pais, poblacion: input.poblacion },
     },
     { apiName: this.apiName,...config });
   

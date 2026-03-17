@@ -1,20 +1,19 @@
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router'; 
+import { RouterLink } from '@angular/router';
 import { ConfigStateService, AuthService } from '@abp/ng.core';
 import { UserProfileService } from '../../proxy/users/user-profile.service';
 
 @Component({
   selector: 'app-user-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink], 
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './user-settings.html',
   styleUrls: ['./user-settings.scss']
 })
 export class UserSettingsComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
-
   private profileService = inject(UserProfileService);
   private configState = inject(ConfigStateService);
   private authService = inject(AuthService);
@@ -35,12 +34,12 @@ export class UserSettingsComponent implements OnInit {
   loadMyData() {
     this.profileService.getProfile(this.currentUserInfo.userName).subscribe({
       next: (data) => {
-        this.editData = { 
-          userName: data.userName, 
-          name: data.name, 
+        this.editData = {
+          userName: data.userName,
+          name: data.name,
           email: data.email || this.currentUserInfo.email,
-          bio: data.bio, 
-          avatarUrl: data.avatarUrl 
+          bio: data.bio,
+          avatarUrl: data.avatarUrl
         };
       }
     });
@@ -56,14 +55,16 @@ export class UserSettingsComponent implements OnInit {
   }
 
   removeAvatar() {
-    this.editData.avatarUrl = ''; 
+    this.editData.avatarUrl = '';
     if (this.fileInput) { this.fileInput.nativeElement.value = ''; }
-    this.mensajeSocial = 'Foto removida. Presiona "Guardar" para activar el Pixel Art.';
+    this.mensajeSocial = 'Foto removida. Presioná "Guardar" para activar el Pixel Art.';
   }
 
   setTab(tab: 'social' | 'seguridad') {
     this.activeTab = tab;
-    this.mensajeSocial = ''; this.mensajeSeguridad = ''; this.mensajeEmail = '';
+    this.mensajeSocial = '';
+    this.mensajeSeguridad = '';
+    this.mensajeEmail = '';
   }
 
   saveSocial() {
@@ -71,10 +72,10 @@ export class UserSettingsComponent implements OnInit {
       next: () => {
         this.mensajeSocial = '¡Perfil actualizado!';
         if (this.editData.userName !== this.currentUserInfo.userName) {
-            alert('Nombre cambiado. Reiniciando sesión...');
-            this.logout(); 
+          alert('Nombre cambiado. Reiniciando sesión...');
+          this.logout();
         } else {
-            setTimeout(() => { window.location.href = '/perfil/' + this.editData.userName; }, 1000);
+          setTimeout(() => { window.location.href = '/perfil/' + this.editData.userName; }, 1000);
         }
       },
       error: () => this.mensajeSocial = 'Error al actualizar.'
@@ -90,7 +91,8 @@ export class UserSettingsComponent implements OnInit {
 
   changePassword() {
     if (this.passData.newPassword !== this.passData.confirmPassword) {
-      this.mensajeSeguridad = 'Las contraseñas no coinciden.'; return;
+      this.mensajeSeguridad = 'Las contraseñas no coinciden.';
+      return;
     }
     this.profileService.changePassword({
       currentPassword: this.passData.currentPassword,

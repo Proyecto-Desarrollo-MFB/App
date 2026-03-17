@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Volo.Abp;
 using Volo.Abp.Data;
 using Volo.Abp.Identity;
@@ -38,6 +40,34 @@ namespace WishTrip.Users
                             $"https://api.dicebear.com/7.x/pixel-art/svg?seed={user.UserName}"
             };
         }
+
+        [AllowAnonymous]
+        public async Task<List<UserProfileDto>> SearchByUserNameAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return new List<UserProfileDto>();
+
+            var allUsers = await _userRepository.GetListAsync(
+                sorting: null, maxResultCount: 200, skipCount: 0, filter: null);
+
+            var filtered = allUsers
+                .Where(u => u.UserName != null &&
+                            u.UserName.ToLower().Contains(query.ToLower()))
+                .Take(10)
+                .ToList();
+
+            return filtered.Select(u => new UserProfileDto
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                Name = u.Name,
+                Email = u.Email,
+                Bio = u.GetProperty<string>("Bio") ?? "Sin biografía.",
+                AvatarUrl = u.GetProperty<string>("AvatarUrl") ??
+                            $"https://api.dicebear.com/7.x/pixel-art/svg?seed={u.UserName}"
+            }).ToList();
+        }
+
+
 
         public async Task UpdateProfileAsync(UpdateProfileDto input)
         {
