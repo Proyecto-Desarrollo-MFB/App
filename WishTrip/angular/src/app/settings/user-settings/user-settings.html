@@ -1,7 +1,6 @@
 <div style="min-height: 100vh; background-color: #14181c;" class="text-white py-5">
   <div class="container" style="max-width: 780px;">
 
-    <!-- Header -->
     <div class="text-center mb-5">
       <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
         <i class="fa fa-paper-plane" style="color: #00c030; font-size: 1.2rem;"></i>
@@ -10,7 +9,6 @@
       <h2 style="font-weight: 800; letter-spacing: 0.1em; font-size: 2rem;">Configuración</h2>
     </div>
 
-    <!-- Pestañas -->
     <div class="d-flex border-bottom border-secondary mb-5">
       <button class="settings-tab" [class.settings-tab-active]="activeTab === 'social'" (click)="setTab('social')">
         <i class="fa fa-user me-2"></i> Perfil
@@ -20,14 +18,12 @@
       </button>
     </div>
 
-    <!-- TAB: PERFIL -->
     <div *ngIf="activeTab === 'social'">
 
       <div class="alert-wishtrip success mb-4" *ngIf="mensajeSocial">
         <i class="fa fa-check-circle me-2"></i>{{ mensajeSocial }}
       </div>
 
-      <!-- Avatar -->
       <div class="settings-section mb-4">
         <div class="d-flex align-items-center gap-4">
           <img [src]="editData.avatarUrl || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + editData.userName"
@@ -51,7 +47,6 @@
 
       <div class="settings-divider"></div>
 
-      <!-- Datos personales -->
       <div class="settings-section mb-4">
         <div class="row g-3">
           <div class="col-md-6">
@@ -70,7 +65,43 @@
         </div>
       </div>
 
-      <div class="d-flex gap-3 mt-2">
+      <div class="settings-divider"></div>
+
+      <div class="settings-section mb-4">
+        <label class="settings-section-title mb-2">
+          <i class="fa fa-star me-2" style="color: #00c030;"></i> Destinos Favoritos
+        </label>
+        <p class="text-white-50 small mb-4">Haz clic en cualquier posición para añadir o cambiar una ciudad de tu Top 5.</p>
+
+        <div class="d-flex flex-wrap gap-3 justify-content-between mb-2">
+          <div *ngFor="let idx of range5" 
+               (click)="abrirBuscadorTop(idx)"
+               class="position-relative d-flex flex-column align-items-center justify-content-center text-center rounded overflow-hidden shadow-sm"
+               style="width: 120px; aspect-ratio: 3/4; background-color: #1c2228; border: 2px dashed #3d4b5c; cursor: pointer; transition: transform 0.2s;">
+            
+            <ng-container *ngIf="misTopDestinos[idx]">
+              <img [src]="misTopDestinos[idx].imageUrl" class="w-100 h-100" style="object-fit: cover; opacity: 0.85;">
+              <div class="position-absolute bottom-0 w-100 p-1 text-truncate" style="background: rgba(0,0,0,0.75); font-size: 0.75rem; font-weight: bold;">
+                {{ misTopDestinos[idx].nombre }}
+              </div>
+              <button class="position-absolute top-0 end-0 btn btn-sm btn-danger m-1" 
+                      style="padding: 1px 6px; font-size: 0.7rem; z-index: 10;" 
+                      (click)="quitarDestinoTop(idx, $event)">
+                <i class="fa fa-times"></i>
+              </button>
+            </ng-container>
+
+            <ng-container *ngIf="!misTopDestinos[idx]">
+              <i class="fa fa-plus text-white-50" style="font-size: 1.4rem;"></i>
+              <span class="text-white-50 position-absolute bottom-0 mb-2" style="font-size: 0.65rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+                POSICIÓN {{ idx + 1 }}
+              </span>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mt-4">
         <button class="btn-settings-primary" (click)="saveSocial()">
           <i class="fa fa-save me-2"></i> Guardar cambios
         </button>
@@ -79,16 +110,57 @@
         </button>
       </div>
 
+      <div *ngIf="showSearchModal" 
+           style="position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+        <div class="rounded border border-secondary" 
+             style="background: #242c34; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;">
+          
+          <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary" style="background: #1c2228;">
+            <span class="text-white-50 fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">Elegir Ciudad Favorita (Nº {{ (indiceSeleccionado ?? 0) + 1 }})</span>
+            <i class="fa fa-times text-white-50" style="cursor: pointer; font-size: 1.2rem;" (click)="cerrarBuscadorTop()"></i>
+          </div>
+
+          <div class="p-3">
+            <label class="settings-label mb-2">Nombre de la Ciudad</label>
+            <div class="input-group mb-3">
+              <input type="text" class="form-control settings-input" 
+                     placeholder="Buscar en tiempo real..." 
+                     [(ngModel)]="queryBusqueda" 
+                     (keyup)="buscarCiudadTop()">
+            </div>
+
+            <div *ngIf="isSearching" class="text-center my-3">
+              <div class="spinner-border spinner-border-sm text-primary"></div>
+            </div>
+
+            <div class="d-flex flex-column rounded overflow-hidden border border-secondary" *ngIf="resultadosBusqueda.length > 0" style="background: #1c2228;">
+              <div *ngFor="let res of resultadosBusqueda"
+                   (click)="seleccionarCiudad(res)"
+                   class="d-flex align-items-center gap-3 p-2 text-white item-busqueda-top"
+                   style="cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #2d3848;">
+                <img [src]="res.imageUrl" style="width: 35px; height: 45px; object-fit: cover; border-radius: 2px;">
+                <div>
+                  <div class="fw-bold" style="font-size: 0.95rem;">{{ res.nombre }}</div>
+                  <small class="text-white-50" style="font-size: 0.8rem;">{{ res.pais }}</small>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="queryBusqueda && resultadosBusqueda.length === 0 && !isSearching" class="text-muted small text-center my-2">
+              No se encontraron ciudades con ese nombre.
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- TAB: SEGURIDAD -->
     <div *ngIf="activeTab === 'seguridad'">
 
       <div class="alert-wishtrip info mb-4" *ngIf="mensajeSeguridad || mensajeEmail">
         <i class="fa fa-info-circle me-2"></i>{{ mensajeSeguridad || mensajeEmail }}
       </div>
 
-      <!-- Email -->
       <div class="settings-section mb-4">
         <label class="settings-section-title mb-3">
           <i class="fa fa-envelope me-2" style="color: #00c030;"></i> Correo Electrónico
@@ -101,7 +173,6 @@
 
       <div class="settings-divider"></div>
 
-      <!-- Contraseña -->
       <div class="settings-section mb-4">
         <label class="settings-section-title mb-3">
           <i class="fa fa-key me-2" style="color: #00c030;"></i> Cambiar Contraseña
@@ -127,7 +198,6 @@
 
       <div class="settings-divider"></div>
 
-      <!-- Zona de peligro -->
       <div class="settings-section danger-zone mt-4 p-4 rounded"
            style="border: 1px solid rgba(231,76,60,0.4); background: rgba(231,76,60,0.05);">
         <label class="settings-section-title mb-3" style="color: #e74c3c;">

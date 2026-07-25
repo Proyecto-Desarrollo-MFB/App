@@ -18,5 +18,8 @@ namespace WishTrip.TravelExperiences
         Task<DestinationStatsDto> GetDestinationStatsAsync(Guid destinationId);
         Task<List<TravelExperienceDto>> GetMyExperiencesByDestinationAsync(Guid destinationId);
         Task SyncHistoricalPreferencesAsync();
+        Task<List<FavoriteDestinationDto>> GetMyFavoritesAsync();
+        Task<List<UserReviewDto>> GetMyReviewsAsync();
+        Task<List<WishlistDestinationDto>> GetMyWishlistAsync();
     }
 }

@@ -109,3 +109,13 @@
     color: #3498db;
   }
 }
+
+.item-busqueda-top {
+  background: #1c2228;
+  
+  &:hover {
+    background: #00c030 !important;
+    color: #000 !important;
+    .text-white { color: #000 !important; }
+  }
+}

@@ -89,13 +89,19 @@ resolverDestino() {
       poblacion: this.city.poblacion || 0
     }).subscribe({
       next: (destino) => {
-        this.resolvedDestinationId = destino.id;
+        const destinationId = destino.id;
+        if (!destinationId) {
+          console.error('Destino resuelto sin id:', destino);
+          return;
+        }
+
+        this.resolvedDestinationId = destinationId;
         this.city.poblacion = destino.poblacion || this.city.poblacion;
-        this.cargarReviews(destino.id);
+        this.cargarReviews(destinationId);
         if (this.isLoggedIn) {
-          this.cargarMiExperiencia(destino.id);
-          this.cargarMiPreferencia(destino.id);
-          this.cargarStats(destino.id);
+          this.cargarMiExperiencia(destinationId);
+          this.cargarMiPreferencia(destinationId);
+          this.cargarStats(destinationId);
         }
       },
       error: (err) => console.error('Error al resolver destino:', err)
@@ -201,7 +207,18 @@ cargarReviews(destinationId: string) {
 
   openNewExperienceModal() {
     if (!this.resolvedDestinationId) return;
-    this.currentExperience = undefined;
+
+    // Le pasamos un objeto nuevo pre-llenado con las preferencias actuales del panel,
+    // pero SIN 'id' para que el modal sepa que debe CREAR una nueva experiencia.
+    this.currentExperience = {
+      destinationId: this.resolvedDestinationId,
+      rating: this.myPreference?.rating || 0,
+      isFavorite: this.myPreference?.isFavorite || false,
+      review: '',
+      startDate: undefined,
+      endDate: undefined
+    } as TravelExperienceDto;
+
     this.showExperienceModal = true;
   }
 

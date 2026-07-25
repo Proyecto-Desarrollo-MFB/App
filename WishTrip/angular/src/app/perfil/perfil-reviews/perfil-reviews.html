@@ -1,0 +1,80 @@
+<div class="container py-5 mt-4">
+  <div class="d-flex align-items-center mb-4 pb-2 border-bottom border-secondary">
+    <h2 class="text-white fw-bold m-0">
+      <i class="fa fa-star me-2 text-warning"></i>Mis Reviews
+    </h2>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-5">
+    <i class="fa fa-spinner fa-spin fa-2x" style="color: #00c030;"></i>
+    <p class="text-white-50 mt-2">Cargando tus reseñas...</p>
+  </div>
+
+  <div *ngIf="!isLoading && reviews.length === 0" class="text-center py-5 text-white-50">
+    <i class="fa fa-commenting-o fa-3x mb-3" style="color: #444;"></i>
+    <h4>Aún no escribiste ninguna reseña</h4>
+    <p class="small">Tus experiencias de viaje aparecerán acá.</p>
+  </div>
+
+  <div class="reviews-list" *ngIf="!isLoading">
+    
+    <div class="review-row-card d-flex align-items-center p-3 mb-3 rounded shadow-sm" 
+         *ngFor="let review of reviews">
+      
+      <img [src]="review.destinationImageUrl || 'https://placehold.co/100x100/1c2430/FFF?text=' + review.destinationName" 
+           (error)="onImageError(review)"
+           class="rounded me-4 object-fit-cover" 
+           style="width: 90px; height: 90px; cursor: pointer;"
+           (click)="irADetalle(review)">
+      
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center mb-1">
+          <h5 class="text-white fw-bold m-0 me-2" style="cursor: pointer; text-decoration: underline;" (click)="irADetalle(review)">
+            {{ review.destinationName }}
+          </h5>
+          <span class="text-warning">
+            <i *ngFor="let isFilled of getStarsArray(review.rating)" class="fa" [ngClass]="isFilled ? 'fa-star' : 'fa-star-o'"></i>
+          </span>
+          <i *ngIf="review.isFavorite" class="fa fa-heart ms-2" style="color: #ff4d4d;"></i>
+        </div>
+        
+        <small class="text-white-50 d-block mb-2">
+          <i class="fa fa-calendar me-1"></i>{{ review.startDate | date:'dd MMM yyyy' }}
+        </small>
+        
+        <p class="text-white-50 m-0" style="font-size: 0.95rem;">{{ review.review }}</p>
+      </div>
+
+      <div class="d-flex gap-2 ms-3">
+        <button class="btn btn-outline-secondary btn-sm edit-btn" (click)="editarReview(review)" title="Editar">
+          <i class="fa fa-pencil text-white-50"></i>
+        </button>
+        <button class="btn btn-outline-danger btn-sm delete-btn" (click)="confirmarEliminar(review)" title="Eliminar">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<app-log-experience-modal
+  *ngIf="showExperienceModal"
+  [destinationId]="selectedDestinationId"
+  [destinationName]="selectedDestinationName"
+  [existingExperience]="experienceToEdit"
+  (saved)="onExperienceSaved()"
+  (closed)="showExperienceModal = false">
+</app-log-experience-modal>
+
+<div *ngIf="showConfirmModal" class="modal-overlay">
+  <div class="modal-box text-center">
+    <i class="fa fa-trash mb-3" style="color: #ff4d4d; font-size: 2rem;"></i>
+    <p class="text-white mb-1" style="font-size: 1.1rem;">¿Eliminar esta reseña?</p>
+    <p class="text-white-50 mb-4" style="font-size: 0.85rem;">Esta acción no se puede deshacer.</p>
+    <div class="d-flex gap-3 justify-content-center">
+      <button class="btn btn-outline-secondary px-4" (click)="showConfirmModal = false">Cancelar</button>
+      <button class="btn btn-danger px-4" (click)="ejecutarEliminacion()">Eliminar</button>
+    </div>
+  </div>
+</div>

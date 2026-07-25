@@ -18,6 +18,8 @@ import { TravelExperienceDto } from '../../proxy/travel-experiences/models';
   templateUrl: './perfil-usuario.html',
   styleUrls: ['./perfil-usuario.scss']
 })
+
+
 export class PerfilUsuarioComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -36,6 +38,7 @@ export class PerfilUsuarioComponent implements OnInit {
   experiencesConReview: any[] = [];
   totalReviews = 0;
   totalDestinos = 0;
+  topDestinations: any[] = [];
 
   showEditModal = false;
   experienceToEdit?: TravelExperienceDto;
@@ -60,11 +63,12 @@ export class PerfilUsuarioComponent implements OnInit {
     });
   }
 
-  loadUserProfile(userName: string) {
+loadUserProfile(userName: string) {
     this.userProfile = null;
     this.usuarioNoEncontrado = false;
     this.experiences = [];
     this.experiencesConReview = [];
+    this.topDestinations = []; // Limpiamos al cargar
 
     this.profileService.getProfile(userName).subscribe({
       next: (data) => {
@@ -72,6 +76,17 @@ export class PerfilUsuarioComponent implements OnInit {
           this.usuarioNoEncontrado = true;
         } else {
           this.userProfile = data;
+          
+          // --- NUEVO: Parsear el Top 5 ---
+          if (data.topDestinations) {
+            try {
+              this.topDestinations = JSON.parse(data.topDestinations);
+            } catch {
+              this.topDestinations = [];
+            }
+          }
+          // -------------------------------
+          
           this.loadExperiences(userName);
         }
       },
@@ -84,8 +99,14 @@ export class PerfilUsuarioComponent implements OnInit {
       next: (data) => {
         this.experiences = data;
         this.experiencesConReview = data.filter(e => e.review && e.review.trim() !== '');
-        this.totalReviews = this.experiencesConReview.length;
-        this.totalDestinos = data.length;
+        
+        // 1. Total de reviews (todas las experiencias en la lista)
+        this.totalReviews = this.experiences.length;
+        
+        // 2. Destinos únicos usando Set
+        const destinosUnicos = new Set(this.experiences.map(exp => exp.destinationId));
+        this.totalDestinos = destinosUnicos.size;
+
         this.experiences.forEach(exp => {
           if (exp.destinationName) {
             this.fetchWikiImage(exp.destinationName, exp);
@@ -95,6 +116,8 @@ export class PerfilUsuarioComponent implements OnInit {
       error: () => {
         this.experiences = [];
         this.experiencesConReview = [];
+        this.totalReviews = 0;
+        this.totalDestinos = 0;
       }
     });
   }
@@ -113,10 +136,10 @@ export class PerfilUsuarioComponent implements OnInit {
     });
   }
 
-  irADestino(exp: any) {
+irADestino(exp: any) {
     const city = {
-      nombre: exp.destinationName,
-      pais: exp.destinationPais || '',
+      nombre: exp.destinationName || exp.nombre,
+      pais: exp.destinationPais || exp.pais || '',
       poblacion: 0,
       imageUrl: exp.imageUrl || null,
       region: null
@@ -161,8 +184,14 @@ export class PerfilUsuarioComponent implements OnInit {
       next: () => {
         this.experiences = this.experiences.filter(e => e.id !== this.experienceToDelete.id);
         this.experiencesConReview = this.experiences.filter(e => e.review && e.review.trim() !== '');
-        this.totalDestinos = this.experiences.length;
-        this.totalReviews = this.experiencesConReview.length;
+        
+        // Recalculamos los destinos únicos después de borrar
+        const destinosUnicos = new Set(this.experiences.map(exp => exp.destinationId));
+        this.totalDestinos = destinosUnicos.size;
+        
+        // Actualizamos el total de reviews
+        this.totalReviews = this.experiences.length;
+        
         this.showConfirmModal = false;
         this.experienceToDelete = null;
       },
@@ -173,14 +202,6 @@ export class PerfilUsuarioComponent implements OnInit {
   cancelarEliminar() {
     this.showConfirmModal = false;
     this.experienceToDelete = null;
-  }
-
-  buscarUsuario() {
-    const user = this.searchUsername.trim();
-    if (user) {
-      this.router.navigate(['/perfil', user]);
-      this.searchUsername = '';
-    }
   }
 
   volverAMiPerfil() {

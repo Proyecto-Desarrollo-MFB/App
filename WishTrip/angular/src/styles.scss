@@ -1,1 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+/* --- MODO OSCURO GLOBAL (BASIC THEME) --- */
+html,
+body,
+app-root,
+abp-dynamic-layout,
+.abp-application-layout,
+main,
+.page-content {
+  background-color: #14181c !important;
+  color: #ffffff !important;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Matamos cualquier fondo blanco de las barras superiores de ABP */
+.abp-page-header,
+.navbar {
+  background-color: transparent !important;
+  border-bottom: none !important;
+}

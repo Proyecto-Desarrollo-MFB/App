@@ -1,0 +1,55 @@
+<div class="container py-5 mt-4">
+  <div class="d-flex align-items-center mb-4 pb-2 border-bottom border-secondary">
+    <h2 class="text-white fw-bold m-0">
+      <i class="fa fa-heart me-2" style="color: #ff4d4d;"></i>Mis Favoritos
+    </h2>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-5">
+    <i class="fa fa-spinner fa-spin fa-2x" style="color: #00c030;"></i>
+    <p class="text-white-50 mt-2">Cargando tus destinos favoritos...</p>
+  </div>
+
+  <div *ngIf="!isLoading && favoritos.length === 0" class="text-center py-5 text-white-50">
+    <div class="mb-3">
+      <i class="fa fa-heart-o fa-3x" style="color: #444;"></i>
+    </div>
+    <h4>Aún no tenés destinos favoritos</h4>
+    <p class="small">Explorá la plataforma y hacé clic en el corazón de cualquier destino para verlo acá.</p>
+    <button class="btn mt-3 text-white fw-bold" style="background-color: #00c030; border: none; padding: 8px 20px;" routerLink="/buscar-ciudades">
+      <i class="fa fa-search me-1"></i> Explorar destinos
+    </button>
+  </div>
+
+  <div class="row" *ngIf="!isLoading && favoritos.length > 0">
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4" *ngFor="let fav of favoritos">
+      
+      <div class="fav-poster-card shadow position-relative rounded overflow-hidden" 
+           (click)="irADetalle(fav)">
+        
+        <div class="image-wrapper">
+          <img [src]="fav.destinationImageUrl || 'https://placehold.co/400x650/1c2430/FFF?text=' + fav.destinationName" 
+               (error)="onImageError(fav)"
+               class="w-100 h-100 object-fit-cover" 
+               alt="{{ fav.destinationName }}">
+          
+          <div class="gradient-overlay"></div>
+        </div>
+
+        <div class="heart-overlay-btn" title="Quitar de favoritos" (click)="quitarFavorito(fav, $event)">
+          <i class="fa fa-heart"></i>
+        </div>
+
+        <div class="poster-info p-3 position-absolute bottom-0 w-100">
+          <h5 class="text-white text-truncate m-0 fw-bold" style="font-size: 1.2rem;">
+            {{ fav.destinationName }}
+          </h5>
+          <span class="text-white-50 d-block small mt-1">
+            <i class="fa fa-map-marker me-1" style="color: #00c030;"></i>{{ fav.destinationPais }}
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

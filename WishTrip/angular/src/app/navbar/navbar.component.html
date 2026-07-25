@@ -25,21 +25,28 @@
           <i class="fa fa-caret-down ms-1"></i>
         </button>
 
-        <div class="user-dropdown" *ngIf="showUserMenu">
+        
+  <div class="user-dropdown" *ngIf="showUserMenu">
   <button class="dropdown-item-btn" (click)="goTo('/')">
     <i class="fa fa-home me-2"></i> Inicio
   </button>
   <button class="dropdown-item-btn" (click)="goTo('/perfil/' + currentUserName)">
     <i class="fa fa-user me-2"></i> Mi Perfil
   </button>
-  <button class="dropdown-item-btn" (click)="goTo('/perfil/' + currentUserName)">
+  <button class="dropdown-item-btn" (click)="goTo('/perfil/' +'/perfil-favoritos')">
+    <i class="fa fa-heart me-2"></i> Mis Favoritos
+  </button>
+  <button class="dropdown-item-btn" (click)="goTo('/perfil/' +'/perfil-reviews')">
     <i class="fa fa-star me-2"></i> Mis Reviews
+  </button>
+  <button class="dropdown-item-btn" (click)="goTo('/perfil/' +'/perfil-wishlist')">
+    <i class="fa fa-clock-o me-2"></i> Mi Wishlist
   </button>
   <div class="dropdown-divider" style="border-top: 1px solid #3d4b5c; margin: 4px 0;"></div>
   <button class="dropdown-item-btn" (click)="goTo('/settings')">
     <i class="fa fa-cog me-2"></i> Configuración
   </button>
-  <button class="dropdown-item-btn" (click)="goTo('/account/logout')">
+  <button class="dropdown-item-btn" (click)="logout()">
     <i class="fa fa-sign-out me-2" style="color: #e74c3c;"></i>
     <span style="color: #e74c3c;">Cerrar sesión</span>
   </button>

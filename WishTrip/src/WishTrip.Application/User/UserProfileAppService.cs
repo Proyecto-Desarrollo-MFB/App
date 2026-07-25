@@ -35,9 +35,11 @@ namespace WishTrip.Users
                 Name = user.Name,
                 Email = user.Email,
                 Bio = user.GetProperty<string>("Bio") ?? "Sin biografía.",
-                // Usamos PIXEL-ART como estilo oficial
                 AvatarUrl = user.GetProperty<string>("AvatarUrl") ??
-                            $"https://api.dicebear.com/7.x/pixel-art/svg?seed={user.UserName}"
+                            $"https://api.dicebear.com/7.x/pixel-art/svg?seed={user.UserName}",
+
+                // --- NUEVO: Leer el Top 5 ---
+                TopDestinations = user.GetProperty<string>("TopDestinations")
             };
         }
 
@@ -63,28 +65,29 @@ namespace WishTrip.Users
                 Email = u.Email,
                 Bio = u.GetProperty<string>("Bio") ?? "Sin biografía.",
                 AvatarUrl = u.GetProperty<string>("AvatarUrl") ??
-                            $"https://api.dicebear.com/7.x/pixel-art/svg?seed={u.UserName}"
+                            $"https://api.dicebear.com/7.x/pixel-art/svg?seed={u.UserName}",
+
+                // --- NUEVO: Leer el Top 5 ---
+                TopDestinations = u.GetProperty<string>("TopDestinations")
             }).ToList();
         }
-
-
 
         public async Task UpdateProfileAsync(UpdateProfileDto input)
         {
             var user = await _userManager.GetByIdAsync(CurrentUser.GetId());
 
-            // 1. Cambio de UserName (FORMA CORRECTA PARA ABP)
             if (user.UserName != input.UserName)
             {
                 var result = await _userManager.SetUserNameAsync(user, input.UserName);
                 if (!result.Succeeded) throw new UserFriendlyException("El nombre de usuario ya está en uso.");
             }
 
-            // 2. Otros datos básicos
             user.Name = input.Name;
             user.SetProperty("Bio", input.Bio);
 
-            // 3. Manejo de Avatar (URL o null para activar Pixel Art)
+            // --- NUEVO: Guardar el Top 5 en la base de datos ---
+            user.SetProperty("TopDestinations", input.TopDestinations);
+
             if (string.IsNullOrWhiteSpace(input.AvatarUrl))
             {
                 user.SetProperty("AvatarUrl", null);
@@ -94,7 +97,6 @@ namespace WishTrip.Users
                 user.SetProperty("AvatarUrl", input.AvatarUrl);
             }
 
-            // 4. Lógica de Email
             if (user.Email != input.Email && !string.IsNullOrWhiteSpace(input.Email))
             {
                 var emailCheck = await _userManager.FindByEmailAsync(input.Email);

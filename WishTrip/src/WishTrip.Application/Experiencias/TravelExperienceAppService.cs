@@ -91,6 +91,21 @@ namespace WishTrip.TravelExperiences
             entity.StartDate = input.StartDate;
             entity.EndDate = input.EndDate;
             await _repository.UpdateAsync(entity, autoSave: true);
+
+            // --- NUEVO: Sincronizar con el panel general ---
+            var userId = _currentUser.GetId();
+            var preference = await _preferenceRepository.FirstOrDefaultAsync(
+                x => x.UserId == userId && x.DestinationId == entity.DestinationId);
+
+            // Si existe el panel, lo actualizamos con los datos de esta edición
+            if (preference != null)
+            {
+                preference.Rating = input.Rating;
+                preference.IsFavorite = input.IsFavorite;
+                await _preferenceRepository.UpdateAsync(preference, autoSave: true);
+            }
+            // -----------------------------------------------
+
             return ObjectMapper.Map<TravelExperience, TravelExperienceDto>(entity);
         }
 
@@ -293,5 +308,102 @@ namespace WishTrip.TravelExperiences
                 }
             }
         }
+        public async Task<List<FavoriteDestinationDto>> GetMyFavoritesAsync()
+        {
+            var userId = _currentUser.GetId();
+
+            var favorites = await _preferenceRepository.GetListAsync(x => x.UserId == userId && x.IsFavorite);
+
+            if (!favorites.Any()) return new List<FavoriteDestinationDto>();
+
+            var destinationIds = favorites.Select(x => x.DestinationId).ToList();
+            var destinos = await _destinoRepository.GetListAsync(x => destinationIds.Contains(x.Id));
+
+            return favorites.Select(fav =>
+            {
+                var dest = destinos.FirstOrDefault(d => d.Id == fav.DestinationId);
+                return new FavoriteDestinationDto
+                {
+                    DestinationId = fav.DestinationId,
+                    DestinationName = dest?.Nombre ?? "Destino desconocido",
+                    DestinationPais = dest?.Pais ?? string.Empty,
+                    DestinationImageUrl = dest?.Foto,
+                    Rating = fav.Rating,
+                    IsFavorite = fav.IsFavorite,
+                    IsWishlist = fav.IsWishlist,
+                    IsVisited = fav.IsVisited
+                };
+            }).ToList();
+        }
+        public async Task<List<UserReviewDto>> GetMyReviewsAsync()
+        {
+            var userId = _currentUser.GetId();
+
+            // Usamos _repository y x.UserId, que son los nombres exactos que usás en tu proyecto
+            var experiences = await _repository.GetListAsync(x => x.UserId == userId && !string.IsNullOrWhiteSpace(x.Review));
+
+            if (!experiences.Any()) return new List<UserReviewDto>();
+
+            // Traemos los destinos y preferencias correspondientes
+            var destIds = experiences.Select(x => x.DestinationId).Distinct().ToList();
+            var destinos = await _destinoRepository.GetListAsync(x => destIds.Contains(x.Id));
+            var preferences = await _preferenceRepository.GetListAsync(x => x.UserId == userId && destIds.Contains(x.DestinationId));
+
+            // Mapeamos
+            return experiences.Select(exp =>
+            {
+                var dest = destinos.FirstOrDefault(d => d.Id == exp.DestinationId);
+                var pref = preferences.FirstOrDefault(p => p.DestinationId == exp.DestinationId);
+
+                return new UserReviewDto
+                {
+                    Id = exp.Id,
+                    DestinationId = exp.DestinationId,
+                    DestinationName = dest?.Nombre ?? "Destino desconocido",
+
+                    // --- ¡ACÁ AGREGAMOS LA LÍNEA DEL PAÍS! ---
+                    DestinationPais = dest?.Pais ?? string.Empty,
+                    // ------------------------------------------
+
+                    DestinationImageUrl = dest?.Foto,
+                    Rating = exp.Rating,
+                    Review = exp.Review,
+                    StartDate = exp.StartDate,
+                    IsFavorite = pref?.IsFavorite ?? false
+                };
+            }).OrderByDescending(x => x.StartDate).ToList();
+        }
+
+        public async Task<List<WishlistDestinationDto>> GetMyWishlistAsync()
+        {
+            var userId = _currentUser.GetId();
+
+            // Traemos las preferencias del usuario actual que estén marcadas como Wishlist
+            var preferences = await _preferenceRepository.GetListAsync(x => x.UserId == userId && x.IsWishlist);
+
+            if (!preferences.Any()) return new List<WishlistDestinationDto>();
+
+            // Buscamos los destinos relacionados a esas preferencias
+            var destinationIds = preferences.Select(x => x.DestinationId).ToList();
+            var destinos = await _destinoRepository.GetListAsync(x => destinationIds.Contains(x.Id));
+
+            return preferences.Select(p =>
+            {
+                var dest = destinos.FirstOrDefault(d => d.Id == p.DestinationId);
+                return new WishlistDestinationDto
+                {
+                    DestinationId = p.DestinationId,
+                    DestinationName = dest?.Nombre ?? "Destino desconocido",
+                    DestinationPais = dest?.Pais ?? string.Empty,
+                    DestinationImageUrl = dest?.Foto,
+                    Rating = p.Rating,
+                    IsFavorite = p.IsFavorite,
+                    IsWishlist = p.IsWishlist,
+                    IsVisited = p.IsVisited
+                };
+            }).ToList();
+        }
+
+
     }
 }

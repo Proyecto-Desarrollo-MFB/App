@@ -120,8 +120,9 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
         const rawCities = res.cities || [];
         this.cities = rawCities.map((c: any) => ({ ...c } as CityWithImage));
         this.cities.sort((a, b) => (b.poblacion || 0) - (a.poblacion || 0));
-        this.loadImagesByName();
         this.isLoading = false;
+        this.loadImagesByName();
+  
       },
       error: (err) => {
         console.error('Error al buscar:', err);
@@ -142,11 +143,17 @@ export class BuscarCiudadesComponent implements OnInit, OnDestroy {
   }
 
   private loadImagesByName() {
-    this.cities.forEach(city => { this.fetchWikiImage(city.nombre, city); });
+    this.cities.forEach(city => {
+      if (city.nombre) {
+        this.fetchWikiImage(city.nombre, city);
+      }
+    });
   }
 
-  private fetchWikiImage(queryName: string, city: CityWithImage) {
-    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(queryName)}&prop=pageimages&format=json&pithumbsize=500&origin=*`;
+private fetchWikiImage(queryName: string, city: CityWithImage) {
+    // ¡Agregamos &redirects=1 a la URL para que siga las redirecciones de Wikipedia!
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(queryName)}&prop=pageimages&format=json&pithumbsize=500&redirects=1&origin=*`;
+    
     this.http.get(url).pipe(catchError(() => of(null))).subscribe((res: any) => {
       if (res?.query?.pages) {
         const pages = res.query.pages;
