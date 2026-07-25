@@ -28,6 +28,17 @@ export interface DestinationStatsDto {
   totalVisits: number;
 }
 
+export interface FavoriteDestinationDto {
+  destinationId?: string;
+  destinationName?: string;
+  destinationPais?: string;
+  destinationImageUrl?: string;
+  rating: number;
+  isFavorite: boolean;
+  isWishlist: boolean;
+  isVisited: boolean;
+}
+
 export interface TravelExperienceDto extends FullAuditedEntityDto<string> {
   destinationId?: string;
   userId?: string;
@@ -66,4 +77,27 @@ export interface UserExperienceDto extends FullAuditedEntityDto<string> {
   isRepeatVisit: boolean;
   startDate?: string;
   endDate?: string;
+}
+
+export interface UserReviewDto {
+  id?: string;
+  destinationId?: string;
+  destinationName?: string;
+  destinationImageUrl?: string;
+  rating: number;
+  review?: string;
+  startDate?: string;
+  isFavorite: boolean;
+  destinationPais?: string;
+}
+
+export interface WishlistDestinationDto {
+  destinationId?: string;
+  destinationName?: string;
+  destinationPais?: string;
+  destinationImageUrl?: string;
+  rating: number;
+  isFavorite: boolean;
+  isWishlist: boolean;
+  isVisited: boolean;
 }

@@ -165,12 +165,13 @@ ngOnInit() {
   }
 
   save() {
-  if (this.form.endDate && this.form.endDate < this.form.startDate) {
-    alert('La fecha de salida no puede ser menor que la fecha de llegada.');
-    return;
-  }
-  this.isSaving = true;
-  // ... resto del método igual
+    if (this.form.endDate && this.form.endDate < this.form.startDate) {
+      alert('La fecha de salida no puede ser menor que la fecha de llegada.');
+      return;
+    }
+    
+    this.isSaving = true;
+
     const dto: CreateUpdateTravelExperienceDto = {
       destinationId: this.destinationId,
       review: this.form.review,
@@ -181,7 +182,9 @@ ngOnInit() {
       endDate: this.form.endDate || undefined,
     };
 
-    const request$ = this.existingExperience
+    // --- EL ARREGLO ESTÁ ACÁ ---
+    // Evaluamos específicamente si existe la propiedad 'id'
+    const request$ = this.existingExperience?.id
       ? this.experienceService.update(this.existingExperience.id, dto)
       : this.experienceService.create(dto);
 

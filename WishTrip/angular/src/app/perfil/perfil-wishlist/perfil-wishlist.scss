@@ -1,0 +1,65 @@
+.wishlist-page {
+  background-color: #14181c;
+  min-height: 100vh;
+  color: white;
+
+  .empty-state {
+    background: #1c2228;
+    margin-top: 2rem;
+  }
+
+  .wish-card {
+    background: #1c2228;
+    aspect-ratio: 2/3;
+    cursor: pointer;
+    border: 1px solid #2d3848;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      border-color: #00c030;
+      z-index: 5;
+
+      .info-overlay {
+        background: rgba(0, 192, 48, 0.85); // Se vuelve verde al pasar el mouse
+        color: #000;
+        .text-white-50 { color: #000 !important; opacity: 0.7; }
+      }
+    }
+
+    .image-container {
+      width: 100%;
+      height: 100%;
+      img {
+        object-fit: cover;
+      }
+    }
+
+    .btn-remove {
+      background: rgba(0, 0, 0, 0.6);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      z-index: 10;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #e74c3c;
+      }
+    }
+
+    .info-overlay {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 100%);
+      transition: background 0.2s;
+    }
+  }
+}

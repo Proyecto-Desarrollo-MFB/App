@@ -1,4 +1,4 @@
-import type { CreateUpdateTravelExperienceDto, DestinationReviewDto, DestinationStatsDto, TravelExperienceDto, UpdateUserPreferenceDto, UserDestinationPreferenceDto, UserExperienceDto } from './models';
+import type { CreateUpdateTravelExperienceDto, DestinationReviewDto, DestinationStatsDto, FavoriteDestinationDto, TravelExperienceDto, UpdateUserPreferenceDto, UserDestinationPreferenceDto, UserExperienceDto, UserReviewDto, WishlistDestinationDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
@@ -55,6 +55,30 @@ export class TravelExperienceService {
     this.restService.request<any, TravelExperienceDto[]>({
       method: 'GET',
       url: `/api/app/travel-experience/my-experiences-by-destination/${destinationId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  getMyFavorites = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, FavoriteDestinationDto[]>({
+      method: 'GET',
+      url: '/api/app/travel-experience/my-favorites',
+    },
+    { apiName: this.apiName,...config });
+  
+
+  getMyReviews = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, UserReviewDto[]>({
+      method: 'GET',
+      url: '/api/app/travel-experience/my-reviews',
+    },
+    { apiName: this.apiName,...config });
+  
+
+  getMyWishlist = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, WishlistDestinationDto[]>({
+      method: 'GET',
+      url: '/api/app/travel-experience/my-wishlist',
     },
     { apiName: this.apiName,...config });
   

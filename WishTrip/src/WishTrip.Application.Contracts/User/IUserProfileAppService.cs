@@ -18,22 +18,25 @@ namespace WishTrip.Users
     {
         public Guid Id { get; set; }
         public string UserName { get; set; }
-        public string Name { get; set; } // NUEVO
+        public string Name { get; set; }
         public string Email { get; set; }
         public string Bio { get; set; }
         public string AvatarUrl { get; set; }
+
+        // --- NUEVO: Guardará las 5 ciudades en formato JSON ---
+        public string? TopDestinations { get; set; }
     }
 
     public class UpdateProfileDto
     {
-        // El UserName y el Email los dejamos sin el "?" porque sí o sí los necesitamos
         public string UserName { get; set; }
         public string Email { get; set; }
-
-        // Le agregamos el "?" a Name, Bio y AvatarUrl para que acepten estar vacíos
         public string? Name { get; set; }
         public string? Bio { get; set; }
         public string? AvatarUrl { get; set; }
+
+        // --- NUEVO ---
+        public string? TopDestinations { get; set; }
     }
 
     // NUEVO DTO

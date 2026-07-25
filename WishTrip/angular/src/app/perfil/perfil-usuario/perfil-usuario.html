@@ -2,17 +2,6 @@
 
   <div class="container py-5">
 
-    <div class="mb-5 d-flex flex-wrap gap-3 justify-content-end align-items-center">
-      <div class="input-group" style="max-width: 350px;">
-        <span class="input-group-text bg-dark border-secondary text-white-50">&#64;</span>
-        <input type="text" class="form-control bg-dark text-white border-secondary"
-               placeholder="Buscar usuario..."
-               [(ngModel)]="searchUsername"
-               (keyup.enter)="buscarUsuario()">
-        <button class="btn btn-primary px-3 fw-bold" (click)="buscarUsuario()">Buscar</button>
-      </div>
-    </div>
-
     <div *ngIf="!userProfile && !usuarioNoEncontrado" class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
       <p class="mt-3 text-white-50">Buscando perfil...</p>
@@ -54,6 +43,30 @@
       </div>
 
       <hr class="border-secondary mb-5">
+
+      <div *ngIf="topDestinations && topDestinations.length > 0">
+        <h6 class="text-white-50 text-uppercase mb-4" style="letter-spacing: 2px;">Destinos Favoritos</h6>
+        
+        <div class="d-flex flex-wrap gap-3 mb-5">
+          <div *ngFor="let destino of topDestinations"
+               (click)="irADestino(destino)"
+               class="position-relative rounded overflow-hidden shadow-sm d-flex flex-column"
+               style="width: 120px; aspect-ratio: 3/4; background-color: #1c2228; border: 1px solid #2d3848; cursor: pointer; transition: transform 0.2s;"
+               onmouseover="this.style.transform='scale(1.05)'" 
+               onmouseout="this.style.transform='scale(1)'">
+            
+            <img [src]="destino.imageUrl || 'https://placehold.co/150x200/2c3440/fff?text=' + destino.nombre"
+                 class="w-100 h-100" style="object-fit: cover; opacity: 0.9;" [alt]="destino.nombre">
+            
+            <div class="position-absolute bottom-0 w-100 p-2 text-truncate text-center" 
+                 style="background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%); font-size: 0.75rem; font-weight: bold; text-shadow: 1px 1px 3px #000;">
+              {{ destino.nombre }}
+            </div>
+          </div>
+        </div>
+        
+        <hr class="border-secondary mb-5">
+      </div>
 
       <h6 class="text-white-50 text-uppercase mb-4" style="letter-spacing: 2px;">Actividad Reciente</h6>
 
@@ -119,30 +132,9 @@
         </div>
       </div>
 
-      <hr class="border-secondary mb-5">
-
-      <h6 class="text-white-50 text-uppercase mb-4" style="letter-spacing: 2px;">Destinos Favoritos</h6>
-      <div class="row row-cols-1 row-cols-md-3 g-4">
-        <div class="col">
-          <div class="card bg-dark text-white border-0 shadow-sm overflow-hidden"
-               style="border-radius: 12px; aspect-ratio: 4/3;">
-            <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a"
-                 class="card-img w-100 h-100" style="object-fit: cover; opacity: 0.8;" alt="Destino">
-          </div>
-        </div>
-        <div class="col">
-          <div class="card bg-dark text-white border-0 shadow-sm overflow-hidden"
-               style="border-radius: 12px; aspect-ratio: 4/3;">
-            <img src="https://images.unsplash.com/photo-1513622470522-26c3c8a854bc"
-                 class="card-img w-100 h-100" style="object-fit: cover; opacity: 0.8;" alt="Destino">
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
-  <!-- Modal confirmación eliminar -->
   <div *ngIf="showConfirmModal"
        style="position: fixed; inset: 0; background: rgba(0,0,0,0.7);
               display: flex; align-items: center; justify-content: center; z-index: 9999;">

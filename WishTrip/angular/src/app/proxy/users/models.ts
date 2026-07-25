@@ -10,6 +10,7 @@ export interface UpdateProfileDto {
   name?: string;
   bio?: string;
   avatarUrl?: string;
+  topDestinations?: string;
 }
 
 export interface UserProfileDto {
@@ -19,4 +20,5 @@ export interface UserProfileDto {
   email?: string;
   bio?: string;
   avatarUrl?: string;
+  topDestinations?: string;
 }

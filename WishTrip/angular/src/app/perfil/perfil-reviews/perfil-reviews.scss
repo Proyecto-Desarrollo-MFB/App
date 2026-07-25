@@ -1,0 +1,54 @@
+/* --- Estilos para la pantalla de Reviews Oscura --- */
+
+:host {
+  display: block;
+  background-color: #14181c; /* Fondo principal oscuro igual que en favoritos */
+  min-height: 100vh;
+}
+
+.review-row-card {
+  background: #1c2530;
+  border: 1px solid #2d3848;
+  transition: border-color 0.2s, background-color 0.2s;
+  
+  &:hover {
+    border-color: #445469 !important;
+    background: #202a36;
+  }
+}
+
+.edit-btn, .delete-btn {
+  border-color: #444;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.edit-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #aaa;
+  i { color: #fff !important; }
+}
+
+.delete-btn:hover {
+  background: rgba(255, 77, 77, 0.1);
+  border-color: #ff4d4d;
+}
+
+/* Modales */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.modal-box {
+  background: #2c3440;
+  border-radius: 12px;
+  padding: 32px;
+  min-width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
